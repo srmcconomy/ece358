@@ -1,0 +1,43 @@
+\documentclass{article}
+
+\begin{document}
+
+\section*{2a}
+Assume peer $p$ and new peer $q$. $p$ can only update if $q < succ(p + i^{m-1})$. The peer at position
+$p - 2^{m-1}$ cannot update since its last finger table entry $<= p$. The peer at
+position $p + 2^{m-1}$ cannot update since it is past $q$. Thus there are at most
+$2\times2^{m-1}=2^m$ finger tables that could update. However if there are any peers $r$
+in the range $(q - 2^{m-1}, q)$, none of the peers in the range $(q - 2^m, q - 2^{m-1})$
+will update since $r$ will be the last element in the finger table for all of
+them. If there are no peers in the range $(q - 2^{m-1}, q)$ then all of the peers in
+the range $(q - 2^m, q - 2^{m-1})$ will be forced to update.  Since this if half of
+all of the possible updates, and the alternative is to remove half of them, this
+must be the worst case scenario of number of updates. So the worst case is $2^{m-1}$.
+
+
+\section*{2b}
+A peer $p$ will only need to be updated if $succ(p + 1)$ has changed due to a new peer $q$ being inserted.
+So only if $p < q < succ(p + 1)$.
+Take another peer $r$.
+Let's say that $p - r > 1$, so $r + 1 < p$.
+Therefore $succ(r + 1)$ could be $p$ if there are no other nodes in the way.
+Thus the only way inserting $q$ could cause an update to $r$ is if $q < p$.
+But the only way it could cause an update to $p$ is if $q > p$.
+Therefore $q$ could cause at most 1 lookup table update if $p - r > 1$ for any $p, r$ in peers.
+So having 3 lookup table updates is not possible at all, since given 3 nodes two of them must be at least 1 space away.
+Having 2 lookup table updates is possible however:\\
+\\
+$r = 1, succ(r + 1) = 7$\\
+$p = 2, succ(p + 1) = 7$\\
+\\
+node 7\\
+node 8\\
+node 9\\
+
+Inserting $q$ at key 3 causes $r$ and $p$ to update.
+Therefore the worst case scenario is 2 lookup tables updating
+
+
+
+
+\end{document}
