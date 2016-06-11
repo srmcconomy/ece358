@@ -34,69 +34,69 @@ int main(int argc, char* argv[]) {
   }
   //if (fork()) {
 
-    if(argc == 3) {
+  if(argc == 3) {
 
-      int socktd = socket(AF_INET, SOCK_STREAM, 0);
-      struct sockaddr_in client;
-      client.sin_family = AF_INET;
-      client.sin_addr.s_addr = htonl(INADDR_ANY);
-      client.sin_port = 0;
-      mybind(socktd, &client);
+    int socktd = socket(AF_INET, SOCK_STREAM, 0);
+    struct sockaddr_in client;
+    client.sin_family = AF_INET;
+    client.sin_addr.s_addr = htonl(INADDR_ANY);
+    client.sin_port = 0;
+    mybind(socktd, &client);
 
-      struct sockaddr_in server;
-      bzero(&server, sizeof(struct sockaddr_in));
-      server.sin_family = AF_INET;
-      if(!inet_aton(argv[1], &(server.sin_addr))) {
-	perror("invalid ip"); return -1;
-      }
-      server.sin_port = htons(atoi(argv[2]));
+    struct sockaddr_in server;
+    bzero(&server, sizeof(struct sockaddr_in));
+    server.sin_family = AF_INET;
+    if(!inet_aton(argv[1], &(server.sin_addr))) {
+      perror("invalid ip"); return -1;
+    }
+    server.sin_port = htons(atoi(argv[2]));
 
-      printf("client associated with %s %d\n", inet_ntoa(client.sin_addr), ntohs(client.sin_port));
-      printf("trying to connect to %s %d...\n", inet_ntoa(server.sin_addr), ntohs(server.sin_port));
-      if(connect(socktd, (struct sockaddr *)&server, sizeof(struct sockaddr_in)) < 0) {
-	perror("connect"); return -1;
-      }
-
-      char buf[buflen];
-      strcpy(buf, "danque");
-      send(socktd, buf, strlen(buf), 0);
-      printf("Sent danque\n");
-
-      recv(socktd, buf, buflen-1, 0);
-      printf("Recieved string %s\n", buf);
+    printf("client associated with %s %d\n", inet_ntoa(client.sin_addr), ntohs(client.sin_port));
+    printf("trying to connect to %s %d...\n", inet_ntoa(server.sin_addr), ntohs(server.sin_port));
+    if(connect(socktd, (struct sockaddr *)&server, sizeof(struct sockaddr_in)) < 0) {
+      perror("connect"); return -1;
     }
 
-    cout << inet_ntoa(addr.sin_addr) << " " << ntohs(addr.sin_port) << endl;
+    char buf[buflen];
+    strcpy(buf, "danque");
+    send(socktd, buf, strlen(buf), 0);
+    printf("Sent danque\n");
 
-    listen(sockfd, 5);
+    recv(socktd, buf, buflen-1, 0);
+    printf("Recieved string %s\n", buf);
+  }
 
-    for(;;) {
-      struct sockaddr_in in_addr;
-      socklen_t len = sizeof(struct sockaddr_in);
-      printf("Starting to accept\n");
+  cout << inet_ntoa(addr.sin_addr) << " " << ntohs(addr.sin_port) << endl;
 
-      int newsockfd;
-      if((newsockfd = accept(sockfd, (struct sockaddr *)&in_addr, &len)) < 0){
-	continue;
-      }
-      printf("Connection accepted from %s %d\n",
+  listen(sockfd, 5);
+
+  for(;;) {
+    struct sockaddr_in in_addr;
+    socklen_t len = sizeof(struct sockaddr_in);
+    printf("Starting to accept\n");
+
+    int newsockfd;
+    if((newsockfd = accept(sockfd, (struct sockaddr *)&in_addr, &len)) < 0){
+      continue;
+    }
+    printf("Connection accepted from %s %d\n",
         inet_ntoa(in_addr.sin_addr), ntohs(in_addr.sin_port));
-      ssize_t recvlen;
-      char buffer[buflen];
-      recvlen = recv(newsockfd, buffer, 16, 0);
-      printf("Recieved %s from %d\n", buffer, getpid());
+    ssize_t recvlen;
+    char buffer[buflen];
+    recvlen = recv(newsockfd, buffer, 16, 0);
+    printf("Recieved %s from %d\n", buffer, getpid());
 
-      strcpy(buffer, "shequels");
-      send(newsockfd, buffer, strlen(buffer), 0);
-      close(newsockfd);
-      //bzero(buffer, 256);
-      //n = read(newsockfd, buffer, 255);
-      //write(newsockfd, "yo", 2);
-      //if (n < 0) continue;
-      //cout << buffer << endl;
-    }
-//  } else {
+    strcpy(buffer, "shequels");
+    send(newsockfd, buffer, strlen(buffer), 0);
+    close(newsockfd);
+    //bzero(buffer, 256);
+    //n = read(newsockfd, buffer, 255);
+    //write(newsockfd, "yo", 2);
+    //if (n < 0) continue;
+    //cout << buffer << endl;
+  }
+//} else {
 
-//  }
+//}
   return 0;
 }
