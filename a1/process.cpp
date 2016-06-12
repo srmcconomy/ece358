@@ -199,10 +199,12 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
         int sockid = socket(AF_INET, SOCK_STREAM, 0);
         connectToPeer(sockid, peers[i].ip, peers[i].port);
         sendMessage(sockid, cmd);
+        if ("naw b" == recieveMessage(sockid)) {
+          continue;
+        }
         if (handle_message(sockfd, peers, content, last_content_id) == NEEDCONTENT) {
           handle_message(sockfd, peers, content, last_content_id);
         }
-
         if ("yee boi" == recieveMessage(sockid)) {
           exists = true;
         }
@@ -256,6 +258,7 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
     unsigned int id;
     iss >> id;
     if (content.count(id)) {
+      sendMessage(newsockfd, "1 sec");
       content.erase(id);
       peers[0].numContent--;
       printf("%d\n", peers[0].numContent);
