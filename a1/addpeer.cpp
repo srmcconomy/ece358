@@ -276,7 +276,7 @@ int main(int argc, char* argv[]) {
             sendMessage(sockid, "needcontent");
             unsigned int newid;
             string newcontent;
-            istringstream newss = istringstream(recieveMessage(sockid));
+            istringstream newss(recieveMessage(sockid));
             newss >> newid >> newcontent;
             content[newid] = newcontent;
             numContent++;
@@ -307,7 +307,7 @@ int main(int argc, char* argv[]) {
       iss >> id;
       if (content.count(id)) {
         string cmd = "y ";
-        cmd.append(contend[id]);
+        cmd.append(content[id]);
         sendMessage(newsockfd, cmd);
       } else {
         sendMessage(newsockfd, "n");
