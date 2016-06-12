@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <vector>
+#include <sstream>
 #include "core.cpp"
 
 using namespace std;
@@ -16,7 +17,7 @@ int main(int argc, char* argv[]) {
 	printf("addcontent: %s\n", argv[3]);
 	command.append(argv[3]);
 	sendMessage(sockfd, command);
-  istringstream iss(recieveMessage(newsockfd));
+  istringstream iss(recieveMessage(sockfd));
   string command;
   iss >> command;
   if (command == "nexist") {
