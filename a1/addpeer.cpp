@@ -316,9 +316,9 @@ int main(int argc, char* argv[]) {
             istringstream iss2(recieveMessage(newsockfd2));
             string command2;
             iss2 >> command2;
+              printf("%s\n", iss.str().c_str());
 
             if (command2 == "numcontent") {
-              printf("%s\n", iss.str().c_str());
               peer p = get_peer(iss);
               for (int i = 1; i < peers.size(); i++) {
                 if (peers[i] == p) {
@@ -387,7 +387,7 @@ int main(int argc, char* argv[]) {
         content.erase(id);
         peers[0].numContent--;
         for (int i = 1; i < peers.size(); i++) {
-          if (peers[i].numContent - peers[0].numContent == 2) {
+          if (peers[i].numContent - peers[0].numContent >= 2) {
             int sockid = socket(AF_INET, SOCK_STREAM, 0);
             connectToPeer(sockid, peers[i].ip, peers[i].port);
             sendMessage(sockid, "needcontent");
