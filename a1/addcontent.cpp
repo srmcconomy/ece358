@@ -7,7 +7,7 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
 	if (argc != 3 && argc != 1) {
-		printf("Usage: %s ip port content", argv[0]);
+		printf("Usage: %s ip port content\n", argv[0]);
 		return -1;
 	}
 

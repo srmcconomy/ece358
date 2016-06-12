@@ -8,7 +8,7 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
   if (argc != 4) {
-    printf("Usage: %s ip port key", argv[0]);
+    printf("Usage: %s ip port key\n", argv[0]);
     return -1;
   }
 
