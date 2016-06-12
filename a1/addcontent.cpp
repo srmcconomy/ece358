@@ -18,7 +18,6 @@ int main(int argc, char* argv[]) {
 	sendMessage(sockfd, command);
 
 	printf("%s\n", recieveMessage(sockfd));
-  close(sockfd);
 
 	return 0;
 }

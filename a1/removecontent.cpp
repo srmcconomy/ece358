@@ -19,7 +19,6 @@ int main(int argc, char* argv[]) {
 
 	if(recieveMessage(sockfd) != "done")
 		printf("Error: no such content\n");
-  close(sockfd);
 
 	return 0;
 }
