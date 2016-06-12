@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
 	if (connectToPeer(sockfd, argv[1], atoi(argv[2])) < 0)
 		printf("Error: no such peer\n");
   sendMessage(sockfd, "allkeys");
-  prinft("%s\n", recieveMessage(sockfd).c_str());
+  printf("%s\n", recieveMessage(sockfd).c_str());
 
 	return 0;
 }
