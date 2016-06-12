@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
 	command.append(argv[3]);
 	sendMessage(sockfd, command);
 
-	printf("%s\n", recieveMessage(sockfd));
+	printf("%s\n", recieveMessage(sockfd).c_str());
 
 	return 0;
 }
