@@ -8,7 +8,7 @@
 #include <string.h>
 #include <sstream>
 #include <vector>
-#include "mybind.c"
+#include "core.cpp"
 #include "pickip.c"
 
 using namespace std;
@@ -33,7 +33,6 @@ int main(int argc, char* argv[]) {
   }
 
   int sockfd;
-  int buflen = 32;
   struct sockaddr_in addr;
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (sockfd < 0)
@@ -51,38 +50,24 @@ int main(int argc, char* argv[]) {
   if(argc == 3) {
 
     int socktd = socket(AF_INET, SOCK_STREAM, 0);
-    struct sockaddr_in client;
-    client.sin_family = AF_INET;
-    client.sin_addr.s_addr = htonl(INADDR_ANY);
-    client.sin_port = 0;
-    mybind(socktd, &client);
 
-    struct sockaddr_in server;
-    bzero(&server, sizeof(struct sockaddr_in));
-    server.sin_family = AF_INET;
-    if(!inet_aton(argv[1], &(server.sin_addr))) {
-      perror("invalid ip"); return -1;
-    }
-    server.sin_port = htons(atoi(argv[2]));
-
-    printf("client associated with %s %d\n", inet_ntoa(client.sin_addr), ntohs(client.sin_port));
-    printf("trying to connect to %s %d...\n", inet_ntoa(server.sin_addr), ntohs(server.sin_port));
-    if(connect(socktd, (struct sockaddr *)&server, sizeof(struct sockaddr_in)) < 0) {
-      perror("connect"); return -1;
-    }
-
-    char buf[32] = "";
+    // String-format: "newpeer 172.46.14.3 10013"
     string cmd = "newpeer ";
     cmd.append(inet_ntoa(addr.sin_addr));
     cmd.append(" ");
     cmd.append(int_to_string(ntohs(addr.sin_port)));
-    strcpy(buf, cmd.c_str());
-    send(socktd, buf, strlen(buf), 0);
 
-    recv(socktd, buf, buflen-1, 0);
-    printf("Recieved string %s\n", buf);
+    connectToPeer(socktd, argv[1], atoi(argv[2]));
+    sendMessage(socktd, cmd);
+    istringstream iss(recieveMessage(socktd));
+    string peerCount;
+    iss >> peerCount;
+    printf("Peer Count: %s\n", peerCount.c_str());
+
+    shutdown(socktd, SHUT_RDWR);
+
   } else {
-    // If first peer, then simply add yourself to peers
+    // Initial peer
     peer self = {
       inet_ntoa(addr.sin_addr),
       ntohs(addr.sin_port),
@@ -94,6 +79,7 @@ int main(int argc, char* argv[]) {
 
   listen(sockfd, 5);
 
+  // Infinite listen loop
   for(;;) {
     struct sockaddr_in in_addr;
     socklen_t len = sizeof(struct sockaddr_in);
@@ -105,12 +91,8 @@ int main(int argc, char* argv[]) {
     }
     printf("Connection accepted from %s %d\n",
         inet_ntoa(in_addr.sin_addr), ntohs(in_addr.sin_port));
-    ssize_t recvlen;
-    char buffer[32] = "";
-    recvlen = recv(newsockfd, buffer, buflen, 0);
-    printf("Recieved %s from %d\n", buffer, getpid());
 
-    istringstream iss(buffer);
+    istringstream iss(recieveMessage(newsockfd));
     string command;
     iss >> command;
 
@@ -128,9 +110,8 @@ int main(int argc, char* argv[]) {
       peers.push_back(nakama);
       string response = "peers ";
       response.append(int_to_string(peers.size()));
-      strcpy(buffer, response.c_str());
+      sendMessage(newsockfd, response);
     }
-    send(newsockfd, buffer, strlen(buffer), 0);
     close(newsockfd);
   }
 //} else {
