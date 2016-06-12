@@ -1,55 +1,55 @@
 all: addpeer removepeer addcontent removecontent lookupcontent allkeys
 
 addpeer: addpeer.o process.o mybind.o pickip.o peer.o core.o
-	g++ addpeer.o process.o mybind.o pickip.o peer.o core.o -o addpeer
+	g++ $^ -o addpeer
 
 removepeer: removepeer.o core.o mybind.o
-	g++ removepeer.o core.o mybind.o -o removepeer
+	g++ $^ -o removepeer
 
 addcontent: addcontent.o core.o mybind.o
-	g++ addcontent.o core.o mybind.o -o addcontent
+	g++ $^ -o addcontent
 
 removecontent: removecontent.o core.o mybind.o
-	g++ removecontent.o core.o mybind.o -o removecontent
+	g++ $^ -o removecontent
 
 lookupcontent: lookupcontent.o core.o mybind.o
-	g++ lookupcontent.o core.o mybind.o -o lookupcontent
+	g++ $^ -o lookupcontent
 
 allkeys: core.o mybind.o allkeys.o
-	g++ core.o mybind.o allkeys.o -o allkeys
+	g++ $^ -o allkeys
 
 addpeer.o: addpeer.cpp
-	g++ -c addpeer.cpp -o addpeer.o
+	g++ -c $^ -o $@
 
 removepeer.o: removepeer.cpp
-	g++ -c removepeer.cpp -o removepeer.o
+	g++ -c $^ -o $@
 
 addcontent.o: addcontent.cpp
-	g++ -c addcontent.cpp -o addcontent.o
+	g++ -c $^ -o $@
 
 removecontent.o: removecontent.cpp
-	g++ -c removecontent.cpp -o removecontent.o
+	g++ -c $^ -o $@
 
 lookupcontent.o: lookupcontent.cpp
-	g++ -c lookupcontent.cpp -o lookupcontent.o
+	g++ -c $^ -o $@
 
 allkeys.o: allkeys.cpp
-	g++ -c allkeys.cpp -o allkeys.o
+	g++ -c $^ -o $@
 
 process.o: process.cpp
-	g++ -c process.cpp -o process.o
+	g++ -c $^ -o $@
 
 mybind.o: mybind.c
-	g++ -c mybind.c -o mybind.o
+	g++ -c $^ -o $@
 
 pickip.o: pickip.c
-	g++ -c pickip.c -o pickip.o
+	g++ -c $^ -o $@
 
 peer.o: peer.cpp
-	g++ -c peer.cpp -o peer.o
+	g++ -c $^ -o $@
 
 core.o: core.cpp
-	g++ -c core.cpp -o core.o
+	g++ -c $^ -o $@
 
 clean:
 	rm *o addpeer removepeer addcontent removecontent lookupcontent allkeys
