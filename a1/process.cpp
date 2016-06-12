@@ -321,7 +321,7 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
         }
       }
     }
-    if (ret) {
+    if (!ret.empty()) {
       string cmd = "done ";
       cmd.append(ret);
       sendMessage(newsockfd, cmd);
