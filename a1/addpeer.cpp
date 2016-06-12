@@ -177,13 +177,13 @@ int main(int argc, char* argv[]) {
 
     if (command == "addcontent") {
       string newid;
-      printf("%s\n", command.c_str());
+      printf("%s\n", iss.str().c_str());
       string newcontent;
       getline(iss, newcontent);
       printf("content to add: %s\n", newcontent.c_str());
       bool you_got_dis = false;
       for (int i = 1; i < peers.size(); i++) {
-        if (peers[0].numContent - peers[i].numContent == 1) {
+        if (peers[0].numContent - peers[i].numContent >= 1) {
           int sockid = socket(AF_INET, SOCK_STREAM, 0);
           connectToPeer(sockid, peers[i].ip, peers[i].port);
           string cmd = "newcontent ";
@@ -219,7 +219,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (command == "newcontent") {
-      printf("%s\n", command.c_str());
+      printf("%s\n", iss.str().c_str());
       string newcontent = iss.str();
       content[last_content_id++] = newcontent;
       peers[0].numContent++;
@@ -238,7 +238,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (command == "pluscontent") {
-      printf("%s\n", command.c_str());
+      printf("%s\n", iss.str().c_str());
       iss >> last_content_id;
       peer p = get_peer(iss);
       for (int i = 1; i < peers.size(); i++) {
@@ -250,7 +250,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (command == "removecontent") {
-      printf("%s\n", command.c_str());
+      printf("%s\n", iss.str().c_str());
       unsigned int id;
       iss >> id;
       if (!content.count(id)) {
@@ -272,11 +272,42 @@ int main(int argc, char* argv[]) {
         } else {
           sendMessage(newsockfd, "nexist");
         }
+      } else {
+        content.erase(id);
+        int numContent = peers[0].numContent - 1;
+        for (int i = 1; i < peers.size(); i++) {
+          if (peers[i].numContent - peers[0].numContent == 2) {
+            int sockid = socket(AF_INET, SOCK_STREAM, 0);
+            connectToPeer(sockid, peers[i].ip, peers[i].port);
+            sendMessage(sockid, "needcontent");
+            unsigned int newid;
+            string newcontent;
+            istringstream newss(recieveMessage(sockid));
+            newss >> newid >> newcontent;
+            content[newid] = newcontent;
+            numContent++;
+            sendMessage(sockid, "done");
+            close(sockid);
+            break;
+          }
+        }
+        if (numContent != peers[0].numContent) {
+          for (int i = 1; i < peers.size(); i++) {
+            int sockid = socket(AF_INET, SOCK_STREAM, 0);
+            connectToPeer(sockid, peers[i].ip, peers[i].port);
+            string cmd = "numcontent";
+            cmd.append(int_to_string(numContent));
+            sendMessage(sockid, cmd);
+            recieveMessage(sockid);
+            close(sockid);
+          }
+        }
+        sendMessage(newsockfd, "done");
       }
     }
 
     if (command == "deletecontent") {
-      printf("%s\n", command.c_str());
+      printf("%s\n", iss.str().c_str());
       unsigned int id;
       iss >> id;
       if (content.count(id)) {
@@ -316,7 +347,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (command == "lookupcontent") {
-      printf("%s\n", command.c_str());
+      printf("%s\n", iss.str().c_str());
       unsigned int id;
       iss >> id;
       if (content.count(id)) {
@@ -329,7 +360,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (command == "needcontent") {
-      printf("%s\n", command.c_str());
+      printf("%s\n", iss.str().c_str());
       map<unsigned int, string>::iterator it = content.begin();
       unsigned int id = it->first;
       string c = it->second;
@@ -341,7 +372,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (command == "numcontent") {
-      printf("%s\n", command.c_str());
+      printf("%s\n", iss.str().c_str());
       peer p = get_peer(iss);
       for (int i = 1; i < peers.size(); i++) {
         if (peers[i] == p) {
