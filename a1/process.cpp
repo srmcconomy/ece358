@@ -1,5 +1,72 @@
 #define NEEDCONTENT 420
 
+//add some new content and notify everyone that we did
+int add_new_content(string newcontent, vector<peer>& peers, map<unsigned int, string>& content, int& last_content_id) {
+  int newid = int_to_string(last_content_id);
+  content[last_content_id++] = newcontent;
+  peers[0].numContent++;
+
+  //tell everyone about my new toy
+  string cmd = "pluscontent ";
+  cmd.append(int_to_string(last_content_id));
+  cmd.append(" ");
+  cmd.append(peers[0].ip);
+  cmd.append(" ");
+  cmd.append(int_to_string(peers[0].port));
+  cmd.append(" ");
+  cmd.append(int_to_string(peers[0].numContent));
+  for (int i = 1; i < peers.size(); i++) {
+    int sockid = socket(AF_INET, SOCK_STREAM, 0);
+    connectToPeer(sockid, peers[i].ip, peers[i].port);
+    sendMessage(sockid, cmd);
+    recieveMessage(sockid);
+    close(sockid);
+  }
+  return newid;
+}
+
+//remove content from the list and tell everyone
+void remove_content(unsigned int id,vector<peer>& peers, map<unsigned int, string>& content, int& last_content_id, int sockfd) {
+  content.erase(id);
+  peers[0].numContent--;
+
+  //if removing this piece of content means that someone has 2 more than me, I need more content
+  for (int i = 1; i < peers.size(); i++) {
+    if (peers[i].numContent - peers[0].numContent >= 2) {
+      int sockid = socket(AF_INET, SOCK_STREAM, 0);
+      connectToPeer(sockid, peers[i].ip, peers[i].port);
+      sendMessage(sockid, "needcontent");
+
+      //handle the other peer's "numcontent" broadcast
+      handle_message(sockfd, peers, content, last_content_id);
+
+      unsigned int newid;
+      string newcontent;
+      istringstream newss(recieveMessage(sockid));
+      newss >> newid >> newcontent;
+      content[newid] = newcontent;
+      peers[0].numContent++;
+      sendMessage(sockid, "done");
+      close(sockid);
+      break;
+    }
+  }
+
+  //tell everyone I have a different amount of content now
+  string cmd = "numcontent ";
+  cmd.append(peers[0].ip);
+  cmd.append(" ");
+  cmd.append(int_to_string(peers[0].port));
+  cmd.append(" ");
+  cmd.append(int_to_string(peers[0].numContent));
+  for (int i = 1; i < peers.size(); i++) {
+    int sockid = socket(AF_INET, SOCK_STREAM, 0);
+    connectToPeer(sockid, peers[i].ip, peers[i].port);
+    sendMessage(sockid, cmd);
+    recieveMessage(sockid);
+    close(sockid);
+  }
+}
 
 int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, string>& content, unsigned int& last_content_id) {
   struct sockaddr_in in_addr;
@@ -343,72 +410,4 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
   close(newsockfd);
   if (command == "needcontent") return NEEDCONTENT;
   return 0;
-}
-
-//add some new content and notify everyone that we did
-int add_new_content(string newcontent, vector<peer>& peers, map<unsigned int, string>& content, int& last_content_id) {
-  int newid = int_to_string(last_content_id);
-  content[last_content_id++] = newcontent;
-  peers[0].numContent++;
-
-  //tell everyone about my new toy
-  string cmd = "pluscontent ";
-  cmd.append(int_to_string(last_content_id));
-  cmd.append(" ");
-  cmd.append(peers[0].ip);
-  cmd.append(" ");
-  cmd.append(int_to_string(peers[0].port));
-  cmd.append(" ");
-  cmd.append(int_to_string(peers[0].numContent));
-  for (int i = 1; i < peers.size(); i++) {
-    int sockid = socket(AF_INET, SOCK_STREAM, 0);
-    connectToPeer(sockid, peers[i].ip, peers[i].port);
-    sendMessage(sockid, cmd);
-    recieveMessage(sockid);
-    close(sockid);
-  }
-  return newid;
-}
-
-//remove content from the list and tell everyone
-void remove_content(unsigned int id,vector<peer>& peers, map<unsigned int, string>& content, int& last_content_id, int sockfd) {
-  content.erase(id);
-  peers[0].numContent--;
-
-  //if removing this piece of content means that someone has 2 more than me, I need more content
-  for (int i = 1; i < peers.size(); i++) {
-    if (peers[i].numContent - peers[0].numContent >= 2) {
-      int sockid = socket(AF_INET, SOCK_STREAM, 0);
-      connectToPeer(sockid, peers[i].ip, peers[i].port);
-      sendMessage(sockid, "needcontent");
-
-      //handle the other peer's "numcontent" broadcast
-      handle_message(sockfd, peers, content, last_content_id);
-
-      unsigned int newid;
-      string newcontent;
-      istringstream newss(recieveMessage(sockid));
-      newss >> newid >> newcontent;
-      content[newid] = newcontent;
-      peers[0].numContent++;
-      sendMessage(sockid, "done");
-      close(sockid);
-      break;
-    }
-  }
-
-  //tell everyone I have a different amount of content now
-  string cmd = "numcontent ";
-  cmd.append(peers[0].ip);
-  cmd.append(" ");
-  cmd.append(int_to_string(peers[0].port));
-  cmd.append(" ");
-  cmd.append(int_to_string(peers[0].numContent));
-  for (int i = 1; i < peers.size(); i++) {
-    int sockid = socket(AF_INET, SOCK_STREAM, 0);
-    connectToPeer(sockid, peers[i].ip, peers[i].port);
-    sendMessage(sockid, cmd);
-    recieveMessage(sockid);
-    close(sockid);
-  }
 }
