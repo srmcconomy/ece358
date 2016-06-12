@@ -6,6 +6,7 @@ using namespace std;
 struct peer {
   string ip;
   int port;
+  int numContent;
 };
 
 bool operator==(const peer& lhs, const peer& rhs)
@@ -25,8 +26,9 @@ string int_to_string(int num) {
 peer get_peer(istringstream& iss) {
   string ip;
   int port;
-  iss >> ip >> port;
-  peer truth = {ip, port};
+  int numContent = 0;
+  iss >> ip >> port >> numContent;
+  peer truth = {ip, port, numContent};
   return truth;
 }
 
@@ -37,6 +39,8 @@ string list_of_peers(vector<peer> peers) {
     all_peers.append(peers[i].ip);
     all_peers.append(" ");
     all_peers.append(int_to_string(peers[i].port));
+    all_peers.append(" ");
+    all_peers.append(int_to_string(peers[i].numContent));
     all_peers.append(" ");
   }
   return all_peers;
