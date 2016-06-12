@@ -1,11 +1,11 @@
-void handle_message(const int sockfd) {
+void handle_message(const int sockfd, const vector<peer>& peers, const map<unsigned int, string> content) {
   struct sockaddr_in in_addr;
   socklen_t len = sizeof(struct sockaddr_in);
   printf("Starting to accept\n");
 
   int newsockfd;
   if ((newsockfd = accept(sockfd, (struct sockaddr *)&in_addr, &len)) < 0){
-    continue;
+    return;
   }
   printf("Connection accepted from %s %d\n",
       inet_ntoa(in_addr.sin_addr), ntohs(in_addr.sin_port));
@@ -109,7 +109,7 @@ void handle_message(const int sockfd) {
         string cmd = "newcontent ";
         cmd.append(newcontent);
         sendMessage(sockid, cmd);
-        handle_message(sockfd);
+        handle_message(sockfd, peers, content);
         newid = recieveMessage(sockid);
         close(sockid);
         you_got_dis = true;
@@ -195,7 +195,7 @@ void handle_message(const int sockfd) {
         int sockid = socket(AF_INET, SOCK_STREAM, 0);
         connectToPeer(sockid, peers[i].ip, peers[i].port);
         sendMessage(sockid, cmd);
-        handle_message(sockfd);
+        handle_message(sockfd, peers, content);
 
         if ("yee boi" == recieveMessage(sockid)) {
           exists = true;
@@ -216,7 +216,7 @@ void handle_message(const int sockfd) {
           int sockid = socket(AF_INET, SOCK_STREAM, 0);
           connectToPeer(sockid, peers[i].ip, peers[i].port);
           sendMessage(sockid, "needcontent");
-          handle_message(sockfd);
+          handle_message(sockfd, peers, content);
           unsigned int newid;
           string newcontent;
           istringstream newss(recieveMessage(sockid));
@@ -259,7 +259,7 @@ void handle_message(const int sockfd) {
           int sockid = socket(AF_INET, SOCK_STREAM, 0);
           connectToPeer(sockid, peers[i].ip, peers[i].port);
           sendMessage(sockid, "needcontent");
-          handle_message(sockfd);
+          handle_message(sockfd, peers, content);
           unsigned int newid;
           string newcontent;
           istringstream newss(recieveMessage(sockid));

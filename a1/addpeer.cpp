@@ -81,7 +81,7 @@ int main(int argc, char* argv[]) {
 
   // Infinite listen loop
   for (;;) {
-    handle_message(sockfd);
+    handle_message(sockfd, peers, content);
   }
 //} else {
 
