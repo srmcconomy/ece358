@@ -176,8 +176,10 @@ int main(int argc, char* argv[]) {
     }
 
     if (command == "addcontent") {
-      printf("addcontent");
+      string newid;
+      printf("%s\n", command.c_str());
       string newcontent = iss.str();
+      printf("content to add: %s\n", newcontent.c_str());
       bool you_got_dis = false;
       for (int i = 1; i < peers.size(); i++) {
         if (peers[0].numContent - peers[i].numContent == 1) {
@@ -186,13 +188,15 @@ int main(int argc, char* argv[]) {
           string cmd = "newcontent ";
           cmd.append(newcontent);
           sendMessage(sockid, cmd);
-          recieveMessage(sockid);
+          newid = recieveMessage(sockid);
           close(sockid);
           you_got_dis = true;
           break;
         }
       }
       if (!you_got_dis) {
+        printf("I got dis\n")
+        newid = int_to_string(last_content_id);
         content[last_content_id++] = newcontent;
         peers[0].numContent++;
         for (int i = 1; i < peers.size(); i++) {
@@ -207,11 +211,11 @@ int main(int argc, char* argv[]) {
           close(sockid);
         }
       }
-      sendMessage(newsockfd, "done");
+      sendMessage(newsockfd, newid);
     }
 
     if (command == "newcontent") {
-      printf("newcontent");
+      printf("%s\n", command.c_str());
       string newcontent = iss.str();
       content[last_content_id++] = newcontent;
       peers[0].numContent++;
@@ -230,7 +234,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (command == "pluscontent") {
-      printf("pluscontent");
+      printf("%s\n", command.c_str());
       iss >> last_content_id;
       peer p = get_peer(iss);
       for (int i = 1; i < peers.size(); i++) {
@@ -242,7 +246,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (command == "removecontent") {
-      printf("removecontent");
+      printf("%s\n", command.c_str());
       unsigned int id;
       iss >> id;
       if (!content.count(id)) {
@@ -268,7 +272,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (command == "deletecontent") {
-      printf("deletecontent");
+      printf("%s\n", command.c_str());
       unsigned int id;
       iss >> id;
       if (content.count(id)) {
@@ -308,7 +312,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (command == "lookupcontent") {
-      printf("lookupcontent");
+      printf("%s\n", command.c_str());
       unsigned int id;
       iss >> id;
       if (content.count(id)) {
@@ -321,7 +325,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (command == "needcontent") {
-      printf("needcontent");
+      printf("%s\n", command.c_str());
       map<unsigned int, string>::iterator it = content.begin();
       unsigned int id = it->first;
       string c = it->second;
@@ -333,7 +337,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (command == "numcontent") {
-      printf("numcontent");
+      printf("%s\n", command.c_str());
       peer p = get_peer(iss);
       for (int i = 1; i < peers.size(); i++) {
         if (peers[i] == p) {
