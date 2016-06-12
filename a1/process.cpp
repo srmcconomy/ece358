@@ -386,6 +386,16 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
     sendMessage(newsockfd, "done");
   }
 
+  if (command == "allkeys") {
+    string msg;
+    for (map<unsigned int, string>::iterator pair = content.begin(); pair != content.end(); pair++) {
+      msg.append(int_to_string(pair->first));
+      msg.append(",");
+    }
+    msg.append("0");
+    sendMessage(newsockfd, msg);
+  }
+
   close(newsockfd);
   if (command == "needcontent") return NEEDCONTENT;
   return 0;

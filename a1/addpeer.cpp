@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
   //if (fork()) {
   vector<peer> peers;
   map<unsigned int, string> content;
-  unsigned int last_content_id = 0;
+  unsigned int last_content_id = 1;
 
   peer self = {
     inet_ntoa(addr.sin_addr),
