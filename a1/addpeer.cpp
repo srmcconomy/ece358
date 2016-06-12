@@ -195,7 +195,7 @@ int main(int argc, char* argv[]) {
         }
       }
       if (!you_got_dis) {
-        printf("I got dis\n")
+        printf("I got dis\n");
         newid = int_to_string(last_content_id);
         content[last_content_id++] = newcontent;
         peers[0].numContent++;
