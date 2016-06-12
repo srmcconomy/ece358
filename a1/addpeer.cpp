@@ -179,7 +179,8 @@ int main(int argc, char* argv[]) {
       string newid;
       printf("%s\n", iss.str().c_str());
       string newcontent;
-      getline(iss, newcontent.substr(1));
+      getline(iss, newcontent);
+      newcontent = newcontent.substr(1);
       printf("content to add: %s\n", newcontent.c_str());
       bool you_got_dis = false;
       for (int i = 1; i < peers.size(); i++) {
@@ -248,7 +249,8 @@ int main(int argc, char* argv[]) {
     if (command == "newcontent") {
       printf("%s\n", iss.str().c_str());
       string newcontent;
-      getline(iss, newcontent.substr(1));
+      getline(iss, newcontent);
+      newcontent = newcontent.substr(1);
       content[last_content_id++] = newcontent;
       peers[0].numContent++;
       for (int i = 1; i < peers.size(); i++) {
