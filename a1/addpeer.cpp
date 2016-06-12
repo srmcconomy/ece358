@@ -189,6 +189,33 @@ int main(int argc, char* argv[]) {
           string cmd = "newcontent ";
           cmd.append(newcontent);
           sendMessage(sockid, cmd);
+          {
+            struct sockaddr_in in_addr2;
+            socklen_t len2 = sizeof(struct sockaddr_in2);
+            printf("Starting to accept\n");
+
+            int newsockfd2;
+            if ((newsockfd2 = accept(sockfd, (struct sockaddr *)&in_addr2, &len2)) < 0){
+            }
+            printf("Connection accepted from %s %d\n",
+                inet_ntoa(in_addr2.sin_addr), ntohs(in_addr2.sin_port));
+
+            istringstream iss2(recieveMessage(newsockfd2));
+            string command2;
+            iss2 >> command2;
+
+            if (command2 == "pluscontent") {
+              printf("%s\n", iss2.str().c_str());
+              iss2 >> last_content_id;
+              peer p2 = get_peer(iss2);
+              for (int i = 1; i < peers.size(); i++) {
+                if (peers[i] == p2) {
+                  peers[i].numContent = p2.numContent;
+                }
+              }
+              sendMessage(newsockfd2, "done");
+            }
+          }
           newid = recieveMessage(sockid);
           close(sockid);
           you_got_dis = true;
