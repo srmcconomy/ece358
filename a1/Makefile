@@ -39,11 +39,11 @@ allkeys.o: allkeys.cpp
 process.o: process.cpp
 	g++ -c process.cpp -o process.o
 
-mybind.o: mybind.cpp
-	g++ -c mybind.cpp -o mybind.o
+mybind.o: mybind.c
+	g++ -c mybind.c -o mybind.o
 
-pickip.o: pickip.cpp
-	g++ -c pickip.cpp -o pickip.o
+pickip.o: pickip.c
+	g++ -c pickip.c -o pickip.o
 
 peer.o: peer.cpp
 	g++ -c peer.cpp -o peer.o
