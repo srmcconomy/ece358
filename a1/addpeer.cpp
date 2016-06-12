@@ -256,10 +256,17 @@ int main(int argc, char* argv[]) {
         string cmd = "pluscontent ";
         cmd.append(int_to_string(last_content_id));
         cmd.append(" ");
+        cmd.append(int_to_string(peers[0].ip));
+        cmd.append(" ");
+        cmd.append(int_to_string(peers[0].port));
+        cmd.append(" ");
         cmd.append(int_to_string(peers[0].numContent));
         sendMessage(sockid, cmd);
         recieveMessage(sockid);
         close(sockid);
+      }
+      for (map<unsigned int, string>::iterator pair = content.begin(); pair != content.end(); pair++) {
+        printf("%d => %s\n", pair->first, pair->second.c_str());
       }
       sendMessage(newsockfd, "done");
     }
@@ -357,11 +364,16 @@ int main(int argc, char* argv[]) {
           }
         }
         if (numContent != peers[0].numContent) {
+          peers[0].numContent = numContent;
+          string cmd = "numcontent";
+          cmd.append(int_to_string(peers[0].ip));
+          cmd.append(" ");
+          cmd.append(int_to_string(peers[0].port));
+          cmd.append(" ");
+          cmd.append(int_to_string(peers[0].numContent));
           for (int i = 1; i < peers.size(); i++) {
             int sockid = socket(AF_INET, SOCK_STREAM, 0);
             connectToPeer(sockid, peers[i].ip, peers[i].port);
-            string cmd = "numcontent";
-            cmd.append(int_to_string(numContent));
             sendMessage(sockid, cmd);
             recieveMessage(sockid);
             close(sockid);
