@@ -343,7 +343,7 @@ int main(int argc, char* argv[]) {
         }
       } else {
         content.erase(id);
-        int peers[0].numContent--;
+        peers[0].numContent--;
         for (int i = 1; i < peers.size(); i++) {
           if (peers[i].numContent - peers[0].numContent == 2) {
             int sockid = socket(AF_INET, SOCK_STREAM, 0);
