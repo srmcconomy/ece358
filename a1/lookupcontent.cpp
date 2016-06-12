@@ -18,7 +18,6 @@ int main(int argc, char* argv[]) {
 	command.append(argv[3]);
 	sendMessage(sockfd, command);
   istringstream iss(recieveMessage(sockfd));
-  string command;
   iss >> command;
   if (command == "nexist") {
     printf("Error: no such content\n");
