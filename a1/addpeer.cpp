@@ -178,7 +178,8 @@ int main(int argc, char* argv[]) {
     if (command == "addcontent") {
       string newid;
       printf("%s\n", command.c_str());
-      string newcontent = iss.str();
+      string newcontent;
+      getline(iss, newcontent);
       printf("content to add: %s\n", newcontent.c_str());
       bool you_got_dis = false;
       for (int i = 1; i < peers.size(); i++) {
@@ -210,6 +211,9 @@ int main(int argc, char* argv[]) {
           recieveMessage(sockid);
           close(sockid);
         }
+      }
+      for (const auto& pair : content) {
+        printf("%d => %s\n", pair->first, pair->second);
       }
       sendMessage(newsockfd, newid);
     }
