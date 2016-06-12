@@ -343,7 +343,7 @@ int main(int argc, char* argv[]) {
         }
       } else {
         content.erase(id);
-        int numContent = peers[0].numContent - 1;
+        int peers[0].numContent--;
         for (int i = 1; i < peers.size(); i++) {
           if (peers[i].numContent - peers[0].numContent == 2) {
             int sockid = socket(AF_INET, SOCK_STREAM, 0);
@@ -354,26 +354,24 @@ int main(int argc, char* argv[]) {
             istringstream newss(recieveMessage(sockid));
             newss >> newid >> newcontent;
             content[newid] = newcontent;
-            numContent++;
+            peers[0].numContent++;
             sendMessage(sockid, "done");
             close(sockid);
             break;
           }
         }
-        if (numContent != peers[0].numContent) {
-          string cmd = "numcontent ";
-          cmd.append(peers[0].ip);
-          cmd.append(" ");
-          cmd.append(int_to_string(peers[0].port));
-          cmd.append(" ");
-          cmd.append(int_to_string(peers[0].numContent));
-          for (int i = 1; i < peers.size(); i++) {
-            int sockid = socket(AF_INET, SOCK_STREAM, 0);
-            connectToPeer(sockid, peers[i].ip, peers[i].port);
-            sendMessage(sockid, cmd);
-            recieveMessage(sockid);
-            close(sockid);
-          }
+        string cmd = "numcontent ";
+        cmd.append(peers[0].ip);
+        cmd.append(" ");
+        cmd.append(int_to_string(peers[0].port));
+        cmd.append(" ");
+        cmd.append(int_to_string(peers[0].numContent));
+        for (int i = 1; i < peers.size(); i++) {
+          int sockid = socket(AF_INET, SOCK_STREAM, 0);
+          connectToPeer(sockid, peers[i].ip, peers[i].port);
+          sendMessage(sockid, cmd);
+          recieveMessage(sockid);
+          close(sockid);
         }
         sendMessage(newsockfd, "done");
       }
