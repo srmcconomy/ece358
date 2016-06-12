@@ -411,9 +411,9 @@ int main(int argc, char* argv[]) {
       if (content.count(id)) {
         content.erase(id);
         peers[0].numContent--;
-        printf(peers[0].numContent);
+        printf("%d\n", peers[0].numContent);
         for (int i = 1; i < peers.size(); i++) {
-          printf(peers[i].numContent);
+          printf("%d\n", peers[i].numContent);
           if (peers[i].numContent - peers[0].numContent >= 2) {
             int sockid = socket(AF_INET, SOCK_STREAM, 0);
             connectToPeer(sockid, peers[i].ip, peers[i].port);
