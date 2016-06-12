@@ -1,8 +1,12 @@
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <string>
 #include "mybind.c"
 
 using namespace std;
 
-void connectToPeer(int sockfd, string ip, int port) {
+int connectToPeer(int sockfd, string ip, int port) {
     struct sockaddr_in client;
     client.sin_family = AF_INET;
     client.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -13,13 +17,15 @@ void connectToPeer(int sockfd, string ip, int port) {
     bzero(&server, sizeof(struct sockaddr_in));
     server.sin_family = AF_INET;
     if(!inet_aton(ip.c_str(), &(server.sin_addr))) {
-        perror("invalid ip"); return;
+        perror("invalid ip"); return -1;
     }
     server.sin_port = htons(port);
 
     if(connect(sockfd, (struct sockaddr *)&server, sizeof(struct sockaddr_in)) < 0) {
-        perror("connect"); return;
+        perror("connect"); return -1;
     }
+
+    return 0;
 }
 
 void sendMessage(int sockfd, string msg) {
