@@ -256,7 +256,7 @@ int main(int argc, char* argv[]) {
         string cmd = "pluscontent ";
         cmd.append(int_to_string(last_content_id));
         cmd.append(" ");
-        cmd.append(int_to_string(peers[0].ip));
+        cmd.append(peers[0].ip);
         cmd.append(" ");
         cmd.append(int_to_string(peers[0].port));
         cmd.append(" ");
@@ -366,7 +366,7 @@ int main(int argc, char* argv[]) {
         if (numContent != peers[0].numContent) {
           peers[0].numContent = numContent;
           string cmd = "numcontent";
-          cmd.append(int_to_string(peers[0].ip));
+          cmd.append(peers[0].ip);
           cmd.append(" ");
           cmd.append(int_to_string(peers[0].port));
           cmd.append(" ");
