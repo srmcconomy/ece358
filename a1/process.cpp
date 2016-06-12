@@ -1,4 +1,4 @@
-void handle_message(const int sockfd, const vector<peer>& peers, const map<unsigned int, string> content) {
+void handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, string> content) {
   struct sockaddr_in in_addr;
   socklen_t len = sizeof(struct sockaddr_in);
   printf("Starting to accept\n");
