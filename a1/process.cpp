@@ -1,3 +1,6 @@
+#define NEEDCONTENT 420
+
+
 int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, string>& content, unsigned int& last_content_id) {
   struct sockaddr_in in_addr;
   socklen_t len = sizeof(struct sockaddr_in);
@@ -195,7 +198,9 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
         int sockid = socket(AF_INET, SOCK_STREAM, 0);
         connectToPeer(sockid, peers[i].ip, peers[i].port);
         sendMessage(sockid, cmd);
-        handle_message(sockfd, peers, content, last_content_id);
+        if (handle_message(sockfd, peers, content, last_content_id) == NEEDCONTENT) {
+          handle_message(sockfd, peers, content, last_content_id);
+        }
 
         if ("yee boi" == recieveMessage(sockid)) {
           exists = true;
@@ -342,5 +347,6 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
   }
 
   close(newsockfd);
+  if (command == "needcontent") return NEEDCONTENT;
   return 0;
 }
