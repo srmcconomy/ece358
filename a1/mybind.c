@@ -1,9 +1,10 @@
-#include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/ip.h>
 #include <errno.h>
+#include <stdio.h>
+#include <string.h>
 
 #define PORT_RANGE_LO 10000
 #define PORT_RANGE_HI 11000

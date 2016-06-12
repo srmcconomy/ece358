@@ -2,6 +2,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <string>
+#include <strings.h>
 #include "mybind.c"
 
 using namespace std;
