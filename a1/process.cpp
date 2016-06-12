@@ -151,6 +151,7 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
     string newcontent;
     getline(iss, newcontent);
     newcontent = newcontent.substr(1);
+    string newid = int_to_string(last_content_id);
     content[last_content_id++] = newcontent;
     peers[0].numContent++;
     for (int i = 1; i < peers.size(); i++) {
@@ -171,7 +172,7 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
     for (map<unsigned int, string>::iterator pair = content.begin(); pair != content.end(); pair++) {
       printf("%d => %s\n", pair->first, pair->second.c_str());
     }
-    sendMessage(newsockfd, "done");
+    sendMessage(newsockfd, newid);
   }
 
   if (command == "pluscontent") {
@@ -299,12 +300,48 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
     printf("%s\n", iss.str().c_str());
     unsigned int id;
     iss >> id;
+    string ret;
     if (content.count(id)) {
-      string cmd = "y ";
+      ret = content[id];
+    } else {
+      string cmd = "getcontent ";
+      cmd.append(int_to_string(id));
+      for (int i = 1; i < peers.size(); i++) {
+        int sockid = socket(AF_INET, SOCK_STREAM, 0);
+        connectToPeer(sockid, peers[i].ip, peers[i].port);
+        sendMessage(sockid, cmd);
+        istringstream newss(recieveMessage(sockid));
+        close(sockid);
+        string c;
+        newss >> c;
+        if (c == "done") {
+          getline(newss, ret);
+          ret = ret.substr(1);
+          break;
+        }
+      }
+    }
+    if (ret) {
+      string cmd = "done ";
+      cmd.append(ret);
+      sendMessage(newsockfd, cmd);
+    } else {
+      sendMessage(newsockfd, "nexist");
+    }
+
+  }
+
+  if (command == "getcontent") {
+    printf("%s\n", iss.str().c_str());
+    unsigned int id;
+    iss >> id;
+    string ret;
+    if (content.count(id)) {
+      string cmd = "done ";
       cmd.append(content[id]);
       sendMessage(newsockfd, cmd);
     } else {
-      sendMessage(newsockfd, "n");
+      sendMessage(newsockfd, "nexist");
     }
   }
 
