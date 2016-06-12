@@ -1,4 +1,4 @@
-int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, string> content, int& last_content_id) {
+int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, string> content, unsigned int& last_content_id) {
   struct sockaddr_in in_addr;
   socklen_t len = sizeof(struct sockaddr_in);
   printf("Starting to accept\n");
@@ -259,7 +259,7 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
           int sockid = socket(AF_INET, SOCK_STREAM, 0);
           connectToPeer(sockid, peers[i].ip, peers[i].port);
           sendMessage(sockid, "needcontent");
-          handle_message(sockfd, peers, content);
+          handle_message(sockfd, peers, content, last_content_id);
           unsigned int newid;
           string newcontent;
           istringstream newss(recieveMessage(sockid));
