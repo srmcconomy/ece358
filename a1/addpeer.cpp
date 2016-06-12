@@ -191,7 +191,7 @@ int main(int argc, char* argv[]) {
           sendMessage(sockid, cmd);
           {
             struct sockaddr_in in_addr2;
-            socklen_t len2 = sizeof(struct sockaddr_in2);
+            socklen_t len2 = sizeof(struct sockaddr_in);
             printf("Starting to accept\n");
 
             int newsockfd2;
