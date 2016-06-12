@@ -15,8 +15,8 @@ removecontent: removecontent.o core.o mybind.o
 lookupcontent: lookupcontent.o core.o mybind.o
 	g++ lookupcontent.o core.o mybind.o -o lookupcontent
 
-allkeys: allkeys.o core.o mybind.o
-	g++ allkeys.o core.o mybind.o -o allkeys
+allkeys: core.o mybind.o allkeys.o
+	g++ core.o mybind.o allkeys.o -o allkeys
 
 addpeer.o: addpeer.cpp
 	g++ -c addpeer.cpp -o addpeer.o
