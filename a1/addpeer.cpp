@@ -182,7 +182,7 @@ int main(int argc, char* argv[]) {
         if (peers[0].numContent - peers[i].numContent == 1) {
           int sockid = socket(AF_INET, SOCK_STREAM, 0);
           connectToPeer(sockid, peers[i].ip, peers[i].port);
-          string cmd = "newcontent "
+          string cmd = "newcontent ";
           cmd.append(newcontent);
           sendMessage(sockid, cmd);
           recieveMessage(sockid);
@@ -199,7 +199,7 @@ int main(int argc, char* argv[]) {
           connectToPeer(sockid, peers[i].ip, peers[i].port);
           string cmd = "pluscontent ";
           cmd.append(int_to_string(last_content_id));
-          cmd.append(int_to_string(" "));
+          cmd.append(" ");
           cmd.append(int_to_string(peers[0].numContent));
           sendMessage(sockid, cmd);
           recieveMessage(sockid);
@@ -218,7 +218,7 @@ int main(int argc, char* argv[]) {
         connectToPeer(sockid, peers[i].ip, peers[i].port);
         string cmd = "pluscontent ";
         cmd.append(int_to_string(last_content_id));
-        cmd.append(int_to_string(" "));
+        cmd.append(" ");
         cmd.append(int_to_string(peers[0].numContent));
         sendMessage(sockid, cmd);
         recieveMessage(sockid);
@@ -280,7 +280,7 @@ int main(int argc, char* argv[]) {
             newss >> newid >> newcontent;
             content[newid] = newcontent;
             numContent++;
-            sendMessage(sockid, "done")
+            sendMessage(sockid, "done");
             close(sockid);
             break;
           }
@@ -303,6 +303,8 @@ int main(int argc, char* argv[]) {
     }
 
     if (command == "lookupcontent") {
+      unsigned int id;
+      iss >> id;
       if (content.count(id)) {
         string cmd = "y ";
         cmd.append(contend[id]);
