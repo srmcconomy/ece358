@@ -104,6 +104,8 @@ int main(int argc, char* argv[]) {
         int sockid = socket(AF_INET, SOCK_STREAM, 0);
         connectToPeer(sockid, peers[i].ip, peers[i].port);
         sendMessage(sockid, cmd);
+        recieveMessage(sockid);
+        close(sockid);
       }
       
       // Give list of networks to new peer
@@ -118,6 +120,7 @@ int main(int argc, char* argv[]) {
       peer mate = get_peer(iss);
       peers.push_back(mate);
 
+      sendMessage(newsockfd, "done");
       printf("%s\n", list_of_peers(peers).c_str());
     }
 
@@ -136,6 +139,8 @@ int main(int argc, char* argv[]) {
           int sockid = socket(AF_INET, SOCK_STREAM, 0);
           connectToPeer(sockid, peers[i].ip, peers[i].port);
           sendMessage(sockid, cmd);
+          recieveMessage(sockid);
+          close(sockid);
         }
 
         // Let user know we finished
@@ -162,6 +167,7 @@ int main(int argc, char* argv[]) {
         }
       }
 
+      sendMessage(newsockfd, "done");
       printf("%s\n", list_of_peers(peers).c_str());
     }
 
