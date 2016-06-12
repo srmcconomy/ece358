@@ -1,55 +1,24 @@
+COMMONREQ = core.cpp mybind.c
+
 all: addpeer removepeer addcontent removecontent lookupcontent allkeys
 
-addpeer: addpeer.o process.o mybind.o pickip.o peer.o core.o
-	g++ $^ -o addpeer
+addpeer: addpeer.cpp process.cpp peer.cpp pickip.c $(COMMONREQ)
+	g++ $^ -o $@
 
-removepeer: removepeer.o core.o mybind.o
-	g++ $^ -o removepeer
+removepeer: removepeer.cpp $(COMMONREQ)
+	g++ $^ -o $@
 
-addcontent: addcontent.o core.o mybind.o
-	g++ $^ -o addcontent
+addcontent: addcontent.cpp $(COMMONREQ)
+	g++ $^ -o $@
 
-removecontent: removecontent.o core.o mybind.o
-	g++ $^ -o removecontent
+removecontent: removecontent.cpp $(COMMONREQ)
+	g++ $^ -o $@
 
-lookupcontent: lookupcontent.o core.o mybind.o
-	g++ $^ -o lookupcontent
+lookupcontent: lookupcontent.cpp $(COMMONREQ)
+	g++ $^ -o $@
 
-allkeys: core.o mybind.o allkeys.o
-	g++ $^ -o allkeys
-
-addpeer.o: addpeer.cpp
-	g++ -c $^ -o $@
-
-removepeer.o: removepeer.cpp
-	g++ -c $^ -o $@
-
-addcontent.o: addcontent.cpp
-	g++ -c $^ -o $@
-
-removecontent.o: removecontent.cpp
-	g++ -c $^ -o $@
-
-lookupcontent.o: lookupcontent.cpp
-	g++ -c $^ -o $@
-
-allkeys.o: allkeys.cpp
-	g++ -c $^ -o $@
-
-process.o: process.cpp
-	g++ -c $^ -o $@
-
-mybind.o: mybind.c
-	g++ -c $^ -o $@
-
-pickip.o: pickip.c
-	g++ -c $^ -o $@
-
-peer.o: peer.cpp
-	g++ -c $^ -o $@
-
-core.o: core.cpp
-	g++ -c $^ -o $@
+allkeys: allkeys.cpp $(COMMONREQ)
+	g++ $^ -o $@
 
 clean:
-	rm *o addpeer removepeer addcontent removecontent lookupcontent allkeys
+	rm addpeer removepeer addcontent removecontent lookupcontent allkeys
