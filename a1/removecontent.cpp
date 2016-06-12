@@ -12,6 +12,8 @@ int main(int argc, char* argv[]) {
 		printf("Error: no such peer");
 
 	string command = "removecontent ";
+
+	printf("removecontent: %s", argv[3]);
 	command.append(argv[3]);
 	sendMessage(sockfd, command);
 

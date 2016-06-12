@@ -176,6 +176,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (command == "addcontent") {
+      printf("addcontent");
       string newcontent = iss.str();
       bool you_got_dis = false;
       for (int i = 1; i < peers.size(); i++) {
@@ -210,6 +211,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (command == "newcontent") {
+      printf("newcontent");
       string newcontent = iss.str();
       content[last_content_id++] = newcontent;
       peers[0].numContent++;
@@ -228,6 +230,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (command == "pluscontent") {
+      printf("pluscontent");
       iss >> last_content_id;
       peer p = get_peer(iss);
       for (int i = 1; i < peers.size(); i++) {
@@ -239,6 +242,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (command == "removecontent") {
+      printf("removecontent");
       unsigned int id;
       iss >> id;
       if (!content.count(id)) {
@@ -264,6 +268,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (command == "deletecontent") {
+      printf("deletecontent");
       unsigned int id;
       iss >> id;
       if (content.count(id)) {
@@ -303,6 +308,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (command == "lookupcontent") {
+      printf("lookupcontent");
       unsigned int id;
       iss >> id;
       if (content.count(id)) {
@@ -315,6 +321,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (command == "needcontent") {
+      printf("needcontent");
       map<unsigned int, string>::iterator it = content.begin();
       unsigned int id = it->first;
       string c = it->second;
@@ -326,6 +333,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (command == "numcontent") {
+      printf("numcontent");
       peer p = get_peer(iss);
       for (int i = 1; i < peers.size(); i++) {
         if (peers[i] == p) {
