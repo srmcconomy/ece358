@@ -316,7 +316,7 @@ int main(int argc, char* argv[]) {
             istringstream iss2(recieveMessage(newsockfd2));
             string command2;
             iss2 >> command2;
-              printf("%s\n", iss.str().c_str());
+              printf("%s\n", iss2.str().c_str());
 
             if (command2 == "numcontent") {
               peer p = get_peer(iss);
@@ -361,7 +361,7 @@ int main(int argc, char* argv[]) {
           }
         }
         if (numContent != peers[0].numContent) {
-          string cmd = "numcontent";
+          string cmd = "numcontent ";
           cmd.append(peers[0].ip);
           cmd.append(" ");
           cmd.append(int_to_string(peers[0].port));
@@ -402,7 +402,7 @@ int main(int argc, char* argv[]) {
             break;
           }
         }
-        string cmd = "numcontent";
+        string cmd = "numcontent ";
         cmd.append(peers[0].ip);
         cmd.append(" ");
         cmd.append(int_to_string(peers[0].port));
