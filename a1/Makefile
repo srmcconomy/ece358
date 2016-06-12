@@ -1,4 +1,4 @@
-all: addpeer removepeer removecontent addcontent
+all: addpeer removepeer removecontent addcontent lookupcontent
 
 addpeer: 
 	g++ addpeer.cpp -o addpeer
@@ -12,5 +12,8 @@ addcontent:
 removecontent:
 	g++ removecontent.cpp -o removecontent
 
+lookupcontent:
+	g++ lookupcontent.cpp -o lookupcontent
+
 clean:
-	rm *o addpeer removepeer removecontent addcontent
+	rm addpeer removepeer removecontent addcontent lookupcontent
