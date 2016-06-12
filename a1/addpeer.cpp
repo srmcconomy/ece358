@@ -212,8 +212,8 @@ int main(int argc, char* argv[]) {
           close(sockid);
         }
       }
-      for (map<unsigned int, string>::iterator pair = content.begin(); pair != content.end; pair++) {
-        printf("%d => %s\n", pair->first, pair->second);
+      for (map<unsigned int, string>::iterator pair = content.begin(); pair != content.end(); pair++) {
+        printf("%d => %s\n", pair->first, pair->second.c_str());
       }
       sendMessage(newsockfd, newid);
     }
