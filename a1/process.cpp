@@ -1,8 +1,10 @@
 #define NEEDCONTENT 420
 
+int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, string>& content, unsigned int& last_content_id);
+
 //add some new content and notify everyone that we did
-int add_new_content(string newcontent, vector<peer>& peers, map<unsigned int, string>& content, int& last_content_id) {
-  int newid = int_to_string(last_content_id);
+string add_new_content(string newcontent, vector<peer>& peers, map<unsigned int, string>& content, unsigned int& last_content_id) {
+  string newid = int_to_string(last_content_id);
   content[last_content_id++] = newcontent;
   peers[0].numContent++;
 
@@ -26,7 +28,7 @@ int add_new_content(string newcontent, vector<peer>& peers, map<unsigned int, st
 }
 
 //remove content from the list and tell everyone
-void remove_content(unsigned int id,vector<peer>& peers, map<unsigned int, string>& content, int& last_content_id, int sockfd) {
+void remove_content(unsigned int id,vector<peer>& peers, map<unsigned int, string>& content, unsigned int& last_content_id, int sockfd) {
   content.erase(id);
   peers[0].numContent--;
 
