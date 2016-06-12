@@ -6,12 +6,26 @@
 #include <netinet/in.h>
 #include <strings.h>
 #include <string.h>
+#include <sstream>
+#include <vector>
 #include "mybind.c"
 #include "pickip.c"
 
 using namespace std;
-int main(int argc, char* argv[]) {
 
+struct peer {
+  string ip;
+  int port;
+};
+
+string int_to_string(int num) {
+  ostringstream ss;
+  ss << num;
+  return ss.str();
+}
+
+int main(int argc, char* argv[]) {
+  vector<peer> peers;
   struct in_addr srvip;
   if(pickServerIPAddr(&srvip) < 0) {
     fprintf(stderr, "pickServerIPAddr() returned error.\n");
@@ -19,7 +33,7 @@ int main(int argc, char* argv[]) {
   }
 
   int sockfd;
-  int buflen = 16;
+  int buflen = 32;
   struct sockaddr_in addr;
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (sockfd < 0)
@@ -57,13 +71,23 @@ int main(int argc, char* argv[]) {
       perror("connect"); return -1;
     }
 
-    char buf[buflen];
-    strcpy(buf, "danque");
+    char buf[32] = "";
+    string cmd = "newpeer ";
+    cmd.append(inet_ntoa(addr.sin_addr));
+    cmd.append(" ");
+    cmd.append(int_to_string(ntohs(addr.sin_port)));
+    strcpy(buf, cmd.c_str());
     send(socktd, buf, strlen(buf), 0);
-    printf("Sent danque\n");
 
     recv(socktd, buf, buflen-1, 0);
     printf("Recieved string %s\n", buf);
+  } else {
+    // If first peer, then simply add yourself to peers
+    peer self = {
+      inet_ntoa(addr.sin_addr),
+      ntohs(addr.sin_port),
+    };
+    peers.push_back(self);
   }
 
   cout << inet_ntoa(addr.sin_addr) << " " << ntohs(addr.sin_port) << endl;
@@ -82,18 +106,32 @@ int main(int argc, char* argv[]) {
     printf("Connection accepted from %s %d\n",
         inet_ntoa(in_addr.sin_addr), ntohs(in_addr.sin_port));
     ssize_t recvlen;
-    char buffer[buflen];
-    recvlen = recv(newsockfd, buffer, 16, 0);
+    char buffer[32] = "";
+    recvlen = recv(newsockfd, buffer, buflen, 0);
     printf("Recieved %s from %d\n", buffer, getpid());
 
-    strcpy(buffer, "shequels");
+    istringstream iss(buffer);
+    string command;
+    iss >> command;
+
+    // Adding a new peer to the system
+    if(command == "newpeer"){
+      int port;
+      string ip;
+      iss >> ip >> port;
+
+      peer nakama = {
+        ip,
+        port,
+      };
+
+      peers.push_back(nakama);
+      string response = "peers ";
+      response.append(int_to_string(peers.size()));
+      strcpy(buffer, response.c_str());
+    }
     send(newsockfd, buffer, strlen(buffer), 0);
     close(newsockfd);
-    //bzero(buffer, 256);
-    //n = read(newsockfd, buffer, 255);
-    //write(newsockfd, "yo", 2);
-    //if (n < 0) continue;
-    //cout << buffer << endl;
   }
 //} else {
 

@@ -26,7 +26,7 @@ int pickServerIPAddr(struct in_addr *srv_ip) {
 	if(i->ifa_addr == NULL) continue;
 	if(i->ifa_addr->sa_family == AF_INET) {
 	    memcpy(srv_ip, &(((struct sockaddr_in *)(i->ifa_addr))->sin_addr), sizeof(struct in_addr));
-            if(!strcmp(inet_ntoa(*srv_ip), "127.0.0.1")) continue;
+        if(!strcmp(inet_ntoa(*srv_ip), "127.0.0.1")) continue;
 	    freeifaddrs(ifa);
 	    return 0;
 	}
