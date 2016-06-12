@@ -1,11 +1,11 @@
-void handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, string> content) {
+int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, string> content) {
   struct sockaddr_in in_addr;
   socklen_t len = sizeof(struct sockaddr_in);
   printf("Starting to accept\n");
 
   int newsockfd;
   if ((newsockfd = accept(sockfd, (struct sockaddr *)&in_addr, &len)) < 0){
-    return;
+    return 0;
   }
   printf("Connection accepted from %s %d\n",
       inet_ntoa(in_addr.sin_addr), ntohs(in_addr.sin_port));
@@ -342,4 +342,5 @@ void handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, str
   }
 
   close(newsockfd);
+  return 0;
 }
