@@ -179,7 +179,7 @@ int main(int argc, char* argv[]) {
       string newid;
       printf("%s\n", iss.str().c_str());
       string newcontent;
-      getline(iss, newcontent);
+      getline(iss, newcontent.substr(1));
       printf("content to add: %s\n", newcontent.c_str());
       bool you_got_dis = false;
       for (int i = 1; i < peers.size(); i++) {
@@ -247,7 +247,8 @@ int main(int argc, char* argv[]) {
 
     if (command == "newcontent") {
       printf("%s\n", iss.str().c_str());
-      string newcontent = iss.str();
+      string newcontent;
+      getline(iss, newcontent.substr(1));
       content[last_content_id++] = newcontent;
       peers[0].numContent++;
       for (int i = 1; i < peers.size(); i++) {
@@ -295,6 +296,34 @@ int main(int argc, char* argv[]) {
           int sockid = socket(AF_INET, SOCK_STREAM, 0);
           connectToPeer(sockid, peers[i].ip, peers[i].port);
           sendMessage(sockid, cmd);
+          {
+            struct sockaddr_in in_addr2;
+            socklen_t len2 = sizeof(struct sockaddr_in);
+            printf("Starting to accept\n");
+
+            int newsockfd2;
+            if ((newsockfd2 = accept(sockfd, (struct sockaddr *)&in_addr2, &len2)) < 0){
+            }
+            printf("Connection accepted from %s %d\n",
+                inet_ntoa(in_addr2.sin_addr), ntohs(in_addr2.sin_port));
+
+            istringstream iss2(recieveMessage(newsockfd2));
+            string command2;
+            iss2 >> command2;
+
+            if (command2 == "numcontent") {
+              printf("%s\n", iss.str().c_str());
+              peer p = get_peer(iss);
+              for (int i = 1; i < peers.size(); i++) {
+                if (peers[i] == p) {
+                  peers[i].numContent = p.numContent;
+                  break;
+                }
+              }
+              sendMessage(newsockfd, "done");
+            }
+          }
+
           if ("yee boi" == recieveMessage(sockid)) {
             exists = true;
           }
@@ -346,7 +375,7 @@ int main(int argc, char* argv[]) {
       iss >> id;
       if (content.count(id)) {
         content.erase(id);
-        int numContent = peers[0].numContent - 1;
+        peers[0].numContent--;
         for (int i = 1; i < peers.size(); i++) {
           if (peers[i].numContent - peers[0].numContent == 2) {
             int sockid = socket(AF_INET, SOCK_STREAM, 0);
@@ -357,27 +386,24 @@ int main(int argc, char* argv[]) {
             istringstream newss(recieveMessage(sockid));
             newss >> newid >> newcontent;
             content[newid] = newcontent;
-            numContent++;
+            peers[0].numContent++;
             sendMessage(sockid, "done");
             close(sockid);
             break;
           }
         }
-        if (numContent != peers[0].numContent) {
-          peers[0].numContent = numContent;
-          string cmd = "numcontent";
-          cmd.append(peers[0].ip);
-          cmd.append(" ");
-          cmd.append(int_to_string(peers[0].port));
-          cmd.append(" ");
-          cmd.append(int_to_string(peers[0].numContent));
-          for (int i = 1; i < peers.size(); i++) {
-            int sockid = socket(AF_INET, SOCK_STREAM, 0);
-            connectToPeer(sockid, peers[i].ip, peers[i].port);
-            sendMessage(sockid, cmd);
-            recieveMessage(sockid);
-            close(sockid);
-          }
+        string cmd = "numcontent";
+        cmd.append(peers[0].ip);
+        cmd.append(" ");
+        cmd.append(int_to_string(peers[0].port));
+        cmd.append(" ");
+        cmd.append(int_to_string(peers[0].numContent));
+        for (int i = 1; i < peers.size(); i++) {
+          int sockid = socket(AF_INET, SOCK_STREAM, 0);
+          connectToPeer(sockid, peers[i].ip, peers[i].port);
+          sendMessage(sockid, cmd);
+          recieveMessage(sockid);
+          close(sockid);
         }
         sendMessage(newsockfd, "yee boi");
       } else {
