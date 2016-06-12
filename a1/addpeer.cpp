@@ -319,14 +319,14 @@ int main(int argc, char* argv[]) {
               printf("%s\n", iss2.str().c_str());
 
             if (command2 == "numcontent") {
-              peer p = get_peer(iss);
+              peer p2 = get_peer(iss2);
               for (int i = 1; i < peers.size(); i++) {
-                if (peers[i] == p) {
-                  peers[i].numContent = p.numContent;
+                if (peers[i] == p2) {
+                  peers[i].numContent = p2.numContent;
                   break;
                 }
               }
-              sendMessage(newsockfd, "done");
+              sendMessage(newsockfd2, "done");
             }
           }
 
