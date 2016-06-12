@@ -393,6 +393,7 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
       msg.append(",");
     }
     msg.append("0");
+    printf("%s\n", msg);
     sendMessage(newsockfd, msg);
   }
 
