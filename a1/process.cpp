@@ -41,7 +41,7 @@ void remove_content(unsigned int id,vector<peer>& peers, map<unsigned int, strin
       int sockid = socket(AF_INET, SOCK_STREAM, 0);
       connectToPeer(sockid, peers[i].ip, peers[i].port);
       // we need 1 content
-      sendMessage(sockid, "needcontent 1");
+      sendMessage(sockid, "needcontent");
 
       //handle the other peer's "numcontent" broadcast
       handle_message(sockfd, peers, content, last_content_id);
@@ -50,7 +50,9 @@ void remove_content(unsigned int id,vector<peer>& peers, map<unsigned int, strin
       unsigned int numcontent;
       string newcontent;
       istringstream newss(recieveMessage(sockid));
-      newss >> newid >> newcontent;
+      newss >> newid;
+      getline(newss, newcontent);
+      newcontent = newcontent.substr(1);
       content[newid] = newcontent;
       peers[0].numContent++;
       sendMessage(sockid, "done");
@@ -142,27 +144,32 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
         // ammount of content per other peer to be redistributed
         int contentPerPeer = (totalContent - remainder)/(peers.size()-1);
 
-        std::map<unsigned int,string>::iterator it = content.begin();
-        // send out content
-        for(int i = 1 ; i < peers.size() ; i++) {
-          string cmd = "givecontent ";
-          int numcontentToSend = contentPerPeer;
-          if(remainder > 0) {
-            ++numcontentToSend;
-            --remainder;
-          }
-          cmd.append(int_to_string(numcontentToSend));
-          cmd.append(" ");
-          for(int x = 0 ; x < numcontentToSend ; x++) {
-            cmd.append(int_to_string(it -> first));
-            cmd.append(" ");
-            cmd.append(it -> second);
-            cmd.append(" ");
-            it++;
-          }
+        cout<<"<<<<"<<"totalContent = "<<totalContent<<endl;
+        cout<<"<<<<"<<"remainder = "<<remainder<<endl;
+        cout<<"<<<<"<<"contentPerPeer = "<<contentPerPeer<<endl;
 
+        std::map<unsigned int,string>::iterator it = content.begin();
+        unsigned int contentToGive = peers[0].numContent;
+        while(contentToGive > 0) {
+          // find the poorest node
+          unsigned int poorestNode = 1;
+          for (int i = 0 ; i < peers.size() ; i++) {
+            if (peers[poorestNode].numContent > peers[i].numContent) {
+              poorestNode = i;
+            }
+          }
+          // assemble one content to give
+          string cmd = "givecontent ";
+          cmd.append(int_to_string(it -> first));
+          cmd.append(" ");
+          cmd.append(it -> second);
+          cmd.append(" ");
+          // move to the next peice of content 
+          it++;
+          --contentToGive;
+          // send it
           int sockid = socket(AF_INET, SOCK_STREAM, 0);
-          connectToPeer(sockid, peers[i].ip, peers[i].port);
+          connectToPeer(sockid, peers[poorestNode].ip, peers[poorestNode].port);
           sendMessage(sockid, cmd);
 
           // handle numcontent from other peer
@@ -219,18 +226,15 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
   // format 'givecontent [numcontent] [content 1 key] [content 1 value] [content 2 key] [content 2 value] ...'
   if (command == "givecontent") {
     printf("%s\n", iss.str().c_str());
-    unsigned int numcontent;
-    iss >> numcontent;
     unsigned int key;
     string value;
-    // read all the pieces of content given to this peer
-    for (int i = 0 ; i < numcontent ; i++) {
-      iss>>key;
-      iss>>value;
-      content[key] = value;
-    }
+    // read the piece of content given to this peer
+    iss>>key;
+    getline(iss, value);
+    value = value.substr(1);
+    content[key] = value;
     // increment the ammount of content in this peer
-    peers[0].numContent += numcontent;
+    peers[0].numContent++;
 
     string cmd = "numcontent ";
     cmd.append(peers[0].ip);
@@ -440,30 +444,19 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
   }
 
   //another peer is asking for some content because it is less fortunate, luckily I have some extra
-  //format `needcontent [numcontent]`
+  //format `needcontent`
   if (command == "needcontent") {
     printf("%s\n", iss.str().c_str());
-    // check how much content is requested
-    unsigned int numContentRequested;
-    iss >> numContentRequested;
-
-    string contentTosend = "";
     std::map<unsigned int,string>::iterator it = content.begin();
-    // while we still need to append content to send or we've reached the end of our content in this node
-    for(int i = 0 ; i < numContentRequested; i++) {
-      unsigned int toEraseInt = it->first;
-      // load up content to send
-      contentTosend.append(int_to_string(it-> first));
-      contentTosend.append(" ");
-      contentTosend.append(it->second);
-      contentTosend.append(" ");
-      // remove content from this peer
-      content.erase(toEraseInt);
-      it++;
-    }
+    // load up content to send
+    string contentTosend = int_to_string(it-> first);
+    contentTosend.append(" ");
+    contentTosend.append(it->second);
+    // remove content from this peer
+    content.erase(it -> first);
 
     // decrement the number of content in this peer
-    peers[0].numContent -= numContentRequested;
+    peers[0].numContent -= 1;
 
     string cmd = "numcontent ";
     cmd.append(peers[0].ip);

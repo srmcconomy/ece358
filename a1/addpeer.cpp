@@ -90,8 +90,6 @@ int main(int argc, char* argv[]) {
     totalContent += peers[i].numContent;
   }
   int contentNeeded = floor(totalContent / (double)peers.size());
-  // array that contains the number of content that this peer will request from other peers
-  int* askArray = new int[peers.size()]();
   while(contentNeeded > 0) {
     // take one content from the peer with the most content
     int biggestContentPeer = 0;
@@ -100,39 +98,29 @@ int main(int argc, char* argv[]) {
           biggestContentPeer = i;
         }
     }
-    // increment ask array by one meaning that we will ask that peer for one more content
-    askArray[biggestContentPeer] += 1;
+
+    int sockid = socket(AF_INET, SOCK_STREAM, 0);
+    connectToPeer(sockid, peers[biggestContentPeer].ip, peers[biggestContentPeer].port);
+    sendMessage(sockid, "needcontent");
+
+    //handle the other peer's "numcontent" broadcast
+    handle_message(sockfd, peers, content, last_content_id);
+
+    unsigned int newid;
+    string newcontent;
+    istringstream newss(recieveMessage(sockid));
+    // add content into this peer
+    newss >> newid;
+    getline(newss, newcontent);
+    newcontent = newcontent.substr(1);
+    content[newid] = newcontent;
+    // increment the ammount of content in this peer
+    peers[0].numContent++;
+    sendMessage(sockid, "done");
+    close(sockid);
     --contentNeeded;
   }
-
-  // now that we have our ask array we can ask other peers for content
-  for (int i = 1; i < peers.size(); i++) {
-    if(askArray[i] > 0) {
-      int sockid = socket(AF_INET, SOCK_STREAM, 0);
-      connectToPeer(sockid, peers[i].ip, peers[i].port);
-      string cmd = "needcontent";
-      cmd.append(" ");
-      cmd.append(int_to_string(askArray[i]));
-      sendMessage(sockid, cmd);
-
-      //handle the other peer's "numcontent" broadcast
-      handle_message(sockfd, peers, content, last_content_id);
-
-      unsigned int newid;
-      string newcontent;
-      istringstream newss(recieveMessage(sockid));
-      // add content into this peer
-      for(int x = 0 ; x < askArray[i] ; x++) {
-        newss >> newid >> newcontent;
-        content[newid] = newcontent;
-      }
-      // increment the ammount of content in this peer
-      peers[0].numContent += askArray[i];
-      sendMessage(sockid, "done");
-      close(sockid);
-    }
-  }
-  delete askArray;
+  
   //tell everyone I have a different amount of content now
   string cmd = "numcontent ";
   cmd.append(peers[0].ip);
