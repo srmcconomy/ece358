@@ -6,7 +6,7 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
-	if (argc != 3 && argc != 1) {
+	if (argc != 4) {
 		printf("Usage: %s ip port content\n", argv[0]);
 		return -1;
 	}
@@ -18,7 +18,7 @@ int main(int argc, char* argv[]) {
 
 	string command = "addcontent ";
 
-	if(argc == 4) { 
+	if(argc == 4) {
 		printf("addcontent: %s\n", argv[3]);
 		command.append(argv[3]);
 		sendMessage(sockfd, command);
