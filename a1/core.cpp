@@ -47,6 +47,6 @@ string recieveMessage(int sockfd) {
     do {
       recv(sockfd, buf, 256, 0);
       s.append(buf);
-    } while(buf[256] != 0);
+    } while(buf[255] != 0);
     return s;
 }
