@@ -31,21 +31,15 @@ int connectToPeer(int sockfd, string ip, int port) {
 
 void sendMessage(int sockfd, string msg) {
   char buf[256];
-  while (msg.length() > 255) {
-    memset(buf, 0, sizeof(buf));
+  do {
     strncpy(buf, msg.c_str(), sizeof(buf));
+    buf[255] = 0;
 
     printf("%s\n", buf);
 
     send(sockfd, buf, sizeof(buf), 0);
-    msg = msg.substr(255);
-  }
-    memset(buf, 0, sizeof(buf));
-  strncpy(buf, msg.c_str(), sizeof(buf));
-  printf("%s\n", buf);
-
-  buf[255] = 0;
-  send(sockfd, buf, strlen(buf), 0);
+    if (msg.lenth() > 255) msg = msg.substr(256);
+  } while(msg.length() > 255);
 }
 
 string recieveMessage(int sockfd) {
@@ -57,6 +51,6 @@ string recieveMessage(int sockfd) {
 
         printf("%s\n", buf);
       s.append(buf);
-    } while(buf[255] != 0);
+    } while(strlen(buf) == 255);
     return s;
 }
