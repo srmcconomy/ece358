@@ -31,15 +31,17 @@ int connectToPeer(int sockfd, string ip, int port) {
 
 void sendMessage(int sockfd, string msg) {
   char buf[256];
-  do {
+  for(;;) {
     strncpy(buf, msg.c_str(), sizeof(buf));
     buf[255] = 0;
 
     printf("%s\n", buf);
 
     send(sockfd, buf, sizeof(buf), 0);
-    if (msg.length() > 255) msg = msg.substr(256);
-  } while(msg.length() > 255);
+    if (msg.length() > 255) {
+      msg = msg.substr(256);
+    } else break;
+  }
 }
 
 string recieveMessage(int sockfd) {
