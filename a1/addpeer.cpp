@@ -91,7 +91,7 @@ int main(int argc, char* argv[]) {
   }
   int contentNeeded = floor(totalContent / (double)peers.size());
   // array that contains the number of content that this peer will request from other peers
-  int* askArray = new int[peers.size()];
+  int* askArray = new int[peers.size()]();
   while(contentNeeded > 0) {
     // take one content from the peer with the most content
     int biggestContentPeer = 0;
