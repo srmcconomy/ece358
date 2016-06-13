@@ -13,11 +13,15 @@ int main(int argc, char* argv[]) {
 
 	string command = "addcontent ";
 
-	printf("addcontent: %s\n", argv[3]);
-	command.append(argv[3]);
-	sendMessage(sockfd, command);
+	if(argc == 4) { 
+		printf("addcontent: %s\n", argv[3]);
+		command.append(argv[3]);
+		sendMessage(sockfd, command);
 
-	printf("%s\n", recieveMessage(sockfd).c_str());
+		printf("%s\n", recieveMessage(sockfd).c_str());
+	} else {
+		printf("Error: no content provided\n");
+	}
 
 	return 0;
 }

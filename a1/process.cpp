@@ -37,15 +37,17 @@ void remove_content(unsigned int id,vector<peer>& peers, map<unsigned int, strin
     if (peers[i].numContent - peers[0].numContent >= 2) {
       int sockid = socket(AF_INET, SOCK_STREAM, 0);
       connectToPeer(sockid, peers[i].ip, peers[i].port);
-      sendMessage(sockid, "needcontent");
+      // we need 1 content
+      sendMessage(sockid, "needcontent 1");
 
       //handle the other peer's "numcontent" broadcast
       handle_message(sockfd, peers, content, last_content_id);
 
       unsigned int newid;
+      unsigned int numcontent;
       string newcontent;
       istringstream newss(recieveMessage(sockid));
-      newss >> newid >> newcontent;
+      newss >> numcontent >> newid >> newcontent;
       content[newid] = newcontent;
       peers[0].numContent++;
       sendMessage(sockid, "done");
@@ -105,8 +107,8 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
 
     // Give list of networks to new peer
     sendMessage(newsockfd, list_of_peers(peers));
+    // add peer to this peer's list of peers
     peers.push_back(nakama);
-
     printf("%s\n", list_of_peers(peers).c_str());
   }
 
@@ -354,14 +356,33 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
   }
 
   //another peer is asking for some content because it is less fortunate, luckily I have some extra
-  //format `needcontent`
+  //format `needcontent [numcontent]`
   if (command == "needcontent") {
     printf("%s\n", iss.str().c_str());
-    map<unsigned int, string>::iterator it = content.begin();
-    unsigned int id = it->first;
-    string c = it->second;
-    content.erase(it);
-    peers[0].numContent--;
+    // check how much content is requested
+    unsigned int numContentRequested;
+    iss >> numContentRequested;
+
+    string contentTosend = "";
+    std::map<unsigned int,string>::iterator it = content.begin();
+    // while we still need to append content to send or we've reached the end of our content in this node
+    int actualNumContentSent = 0;
+    while(numContentRequested > 0 && it != content.end()) {
+      unsigned int toEraseInt = it->first;
+      // load up content to send
+      contentTosend.append(int_to_string(it-> first));
+      contentTosend.append(" ");
+      contentTosend.append(it->second);
+      contentTosend.append(" ");
+      ++actualNumContentSent;
+      // decrement the number of content in this peer
+      peers[0].numContent -= 1;
+      ++it;
+      // remove content from this peer
+      content.erase(toEraseInt);
+      --numContentRequested;
+    }
+
     string cmd = "numcontent ";
     cmd.append(peers[0].ip);
     cmd.append(" ");
@@ -377,10 +398,9 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
       recieveMessage(sockid);
       close(sockid);
     }
-    string msg = int_to_string(id);
-    msg.append(" ");
-    msg.append(c);
-    sendMessage(newsockfd, msg);
+
+    // return the number of content and the kvp with key and values delimited by spaces
+    sendMessage(newsockfd, actualNumContentSent + " " + contentTosend);
   }
 
   //a notification that a peer has changed its number of content
