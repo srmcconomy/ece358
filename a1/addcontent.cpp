@@ -19,7 +19,6 @@ int main(int argc, char* argv[]) {
 	string command = "addcontent ";
 
 	if(argc == 4) {
-		printf("addcontent: %s\n", argv[3]);
 		command.append(argv[3]);
 		sendMessage(sockfd, command);
 
