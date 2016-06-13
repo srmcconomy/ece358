@@ -104,9 +104,11 @@ int main(int argc, char* argv[]) {
     askArray[biggestContentPeer] += 1;
     --contentNeeded;
   }
+  cout<<"askarray ";
   // now that we have our ask array we can ask other peers for content
   for (int i = 1; i < peers.size(); i++) {
     if(askArray[i] > 0) {
+      cout<<i<<" -> "<<askArray[i]<<" ";
       int sockid = socket(AF_INET, SOCK_STREAM, 0);
       connectToPeer(sockid, peers[i].ip, peers[i].port);
       string cmd = "needcontent";
@@ -118,28 +120,44 @@ int main(int argc, char* argv[]) {
       handle_message(sockfd, peers, content, last_content_id);
 
       unsigned int newid;
-      unsigned int numcontent;
       string newcontent;
       istringstream newss(recieveMessage(sockid));
-      // get the number of content actually returned by the peer
-      newss >> numcontent;
       // add content into this peer
-      for(int x = 0 ; x < numcontent ; x++) {
+      for(int x = 0 ; x < askArray[i] ; x++) {
         newss >> newid >> newcontent;
+        printf("content received %d -> %s\n", newid, newcontent);
         content[newid] = newcontent;
       }
       // increment the ammount of content in this peer
-      peers[0].numContent += numcontent;
+      peers[0].numContent += askArray[i];
       sendMessage(sockid, "done");
       close(sockid);
     }
   }
+  cout<<endl;
+  //tell everyone I have a different amount of content now
+  string cmd = "numcontent ";
+  cmd.append(peers[0].ip);
+  cmd.append(" ");
+  cmd.append(int_to_string(peers[0].port));
+  cmd.append(" ");
+  cmd.append(int_to_string(peers[0].numContent));
+  for (int i = 1; i < peers.size(); i++) {
+    cout<<"notifying peer "<<i<<" of new numcontent"<<endl;
+    int sockid = socket(AF_INET, SOCK_STREAM, 0);
+    connectToPeer(sockid, peers[i].ip, peers[i].port);
+    sendMessage(sockid, cmd);
+    recieveMessage(sockid);
+    close(sockid);
+  }
+  cout<<"finished notifying"<<endl;
   // finished load balancing on add peer
   cout << inet_ntoa(addr.sin_addr) << " " << ntohs(addr.sin_port) << endl;
 
   // Infinite listen loop
   for (;;) {
-    if (handle_message(sockfd, peers, content, last_content_id)) break;
+    int retCode = handle_message(sockfd, peers, content, last_content_id);
+    if (retCode == RETURN_ERROR || retCode == RETURN_SHUTDOWN) break;
   }
 //} else {
 
