@@ -13,17 +13,19 @@ int main(int argc, char* argv[]) {
 
 	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
-	if (connectToPeer(sockfd, argv[1], atoi(argv[2])) < 0)
-		printf("Error: no such peer\n");
+	if (connectToPeer(sockfd, argv[1], atoi(argv[2])) < 0) {
+		fprintf(stderr, "Error: no such peer\n");
+		return -1;
+	}
 
 	string command = "removecontent ";
-
-	printf("removecontent: %s\n", argv[3]);
 	command.append(argv[3]);
 	sendMessage(sockfd, command);
 
-	if(recieveMessage(sockfd) != "done")
-		printf("Error: no such content\n");
+	if(recieveMessage(sockfd) != "done") {
+		fprintf(stderr, "Error: no such content\n");
+		return -1;
+	}
 
 	return 0;
 }

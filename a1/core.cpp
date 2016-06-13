@@ -18,12 +18,12 @@ int connectToPeer(int sockfd, string ip, int port) {
     bzero(&server, sizeof(struct sockaddr_in));
     server.sin_family = AF_INET;
     if(!inet_aton(ip.c_str(), &(server.sin_addr))) {
-        perror("invalid ip"); return -1;
+        perror("Invalid IP"); return -1;
     }
     server.sin_port = htons(port);
 
     if(connect(sockfd, (struct sockaddr *)&server, sizeof(struct sockaddr_in)) < 0) {
-        perror("connect"); return -1;
+        perror("Cannot connect"); return -1;
     }
 
     return 0;
@@ -34,9 +34,6 @@ void sendMessage(int sockfd, string msg) {
   for(;;) {
     strncpy(buf, msg.c_str(), sizeof(buf));
     buf[255] = 0;
-
-    printf("%s\n", buf);
-
     send(sockfd, buf, sizeof(buf), 0);
     if (msg.length() >= 255) {
       msg = msg.substr(255);
@@ -50,8 +47,6 @@ string recieveMessage(int sockfd) {
     do {
       memset(buf, 0, sizeof(buf));
       recv(sockfd, buf, 256, 0);
-
-        printf("%s\n", buf);
       s.append(buf);
     } while(strlen(buf) == 255);
     return s;
