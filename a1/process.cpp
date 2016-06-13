@@ -1,4 +1,7 @@
-#define NEEDCONTENT 420
+#define RETURN_NEEDCONTENT 300
+#define RETURN_NORMAL 100
+#define RETURN_ERROR -1
+#define RETURN_SHUTDOWN 1
 
 int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, string>& content, unsigned int& last_content_id);
 
@@ -47,7 +50,7 @@ void remove_content(unsigned int id,vector<peer>& peers, map<unsigned int, strin
       unsigned int numcontent;
       string newcontent;
       istringstream newss(recieveMessage(sockid));
-      newss >> numcontent >> newid >> newcontent;
+      newss >> newid >> newcontent;
       content[newid] = newcontent;
       peers[0].numContent++;
       sendMessage(sockid, "done");
@@ -79,7 +82,7 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
 
   int newsockfd;
   if ((newsockfd = accept(sockfd, (struct sockaddr *)&in_addr, &len)) < 0){
-    return 0;
+    return RETURN_NORMAL;
   }
   printf("Connection accepted from %s %d\n",
       inet_ntoa(in_addr.sin_addr), ntohs(in_addr.sin_port));
@@ -144,10 +147,10 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
       sendMessage(newsockfd, "done");
 
       if(shutdown(newsockfd, SHUT_RDWR) < 0) {
-        perror("shutdown"); return -1;
+        perror("shutdown"); return RETURN_ERROR;
       }
 
-      return 1;
+      return RETURN_SHUTDOWN;
 
     } else {
       sendMessage(newsockfd, "nexist");
@@ -258,7 +261,7 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
         }
         //if the peer does have the content, then we expect it to either broadcast "needcontent" or "numcontent"
         //so handle those
-        if (handle_message(sockfd, peers, content, last_content_id) == NEEDCONTENT) {
+        if (handle_message(sockfd, peers, content, last_content_id) == RETURN_NEEDCONTENT) {
           handle_message(sockfd, peers, content, last_content_id);
         }
 
@@ -363,25 +366,27 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
     unsigned int numContentRequested;
     iss >> numContentRequested;
 
+    cout<<"supplying content qty = "<<numContentRequested<<endl;
+    cout<<"numcontent in peer = "<<peers[0].numContent<<endl;
     string contentTosend = "";
     std::map<unsigned int,string>::iterator it = content.begin();
     // while we still need to append content to send or we've reached the end of our content in this node
-    int actualNumContentSent = 0;
-    while(numContentRequested > 0 && it != content.end()) {
+    for(int i = 0 ; i < numContentRequested; i++) {
       unsigned int toEraseInt = it->first;
       // load up content to send
       contentTosend.append(int_to_string(it-> first));
       contentTosend.append(" ");
       contentTosend.append(it->second);
       contentTosend.append(" ");
-      ++actualNumContentSent;
-      // decrement the number of content in this peer
-      peers[0].numContent -= 1;
-      ++it;
       // remove content from this peer
       content.erase(toEraseInt);
-      --numContentRequested;
+      it++;
     }
+      // decrement the number of content in this peer
+    peers[0].numContent -= numContentRequested;
+
+    cout<<"supply content string: "<<contentTosend<<endl;
+    cout<<"numcontent in peer = "<<peers[0].numContent<<endl;
 
     string cmd = "numcontent ";
     cmd.append(peers[0].ip);
@@ -390,7 +395,7 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
     cmd.append(" ");
     cmd.append(int_to_string(peers[0].numContent));
 
-    //broadcast to everyone the fact that I have 1 less content meow
+    //broadcast to everyone the fact that I have less content meow
     for (int i = 1; i < peers.size(); i++) {
       int sockid = socket(AF_INET, SOCK_STREAM, 0);
       connectToPeer(sockid, peers[i].ip, peers[i].port);
@@ -399,8 +404,9 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
       close(sockid);
     }
 
+    cout<<"sending back content"<<endl;
     // return the number of content and the kvp with key and values delimited by spaces
-    sendMessage(newsockfd, actualNumContentSent + " " + contentTosend);
+    sendMessage(newsockfd, contentTosend);
   }
 
   //a notification that a peer has changed its number of content
@@ -429,7 +435,8 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
     sendMessage(newsockfd, msg);
   }
 
+  cout<<"closing newsockfd"<<endl;
   close(newsockfd);
-  if (command == "needcontent") return NEEDCONTENT;
-  return 0;
+  if (command == "needcontent") return RETURN_NEEDCONTENT;
+  return RETURN_NORMAL;
 }
