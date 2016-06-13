@@ -32,7 +32,7 @@ int connectToPeer(int sockfd, string ip, int port) {
 void sendMessage(int sockfd, string msg) {
   char buf[256];
   while (msg.length() > 255) {
-    buf = "";
+    memset(buf, 0, sizeof(buf));
     strncpy(buf, msg.c_str(), sizeof(buf));
 
     printf("%s\n", buf);
@@ -40,7 +40,7 @@ void sendMessage(int sockfd, string msg) {
     send(sockfd, buf, sizeof(buf), 0);
     msg = msg.substr(255);
   }
-  buf = "";
+    memset(buf, 0, sizeof(buf));
   strncpy(buf, msg.c_str(), sizeof(buf));
   printf("%s\n", buf);
 
@@ -52,7 +52,7 @@ string recieveMessage(int sockfd) {
     char buf[256];
     string s = "";
     do {
-      buf = "";
+      memset(buf, 0, sizeof(buf));
       recv(sockfd, buf, 256, 0);
 
         printf("%s\n", buf);
