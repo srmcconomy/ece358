@@ -130,19 +130,62 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
 
     // Confirm that remove peer and this peer are the same
     if(death == peers[0]) {
-      string cmd = "deletepeer ";
-      cmd.append(death.ip);
-      cmd.append(" ");
-      cmd.append(int_to_string(death.port));
-      // start at 1 so we don't send message to ourself
-      for (int i = 1; i < peers.size(); i++) {
-        int sockid = socket(AF_INET, SOCK_STREAM, 0);
-        connectToPeer(sockid, peers[i].ip, peers[i].port);
-        sendMessage(sockid, cmd);
-        recieveMessage(sockid);
-        close(sockid);
-      }
+      // offload contents to other peers
+      if(peers.size() > 1) {
+        int totalContent = 0;
 
+        for (int i = 0 ; i < peers.size() ; i++) {
+          totalContent += peers[i].numContent;
+        }
+        // remainder number of content after content is evenly ditributed amongst peers
+        int remainder = totalContent % (peers.size()-1); 
+        // ammount of content per other peer to be redistributed
+        int contentPerPeer = (totalContent - remainder)/(peers.size()-1);
+
+        std::map<unsigned int,string>::iterator it = content.begin(); 
+        // send out content
+        for(int i = 1 ; i < peers.size() ; i++) {
+          string cmd = "givecontent ";
+          int numcontentToSend = contentPerPeer;
+          if(remainder > 0) {
+            ++numcontentToSend;
+            --remainder;
+          }
+          cmd.append(int_to_string(numcontentToSend));
+          cmd.append(" ");
+          for(int x = 0 ; x < numcontentToSend ; x++) {
+            cmd.append(int_to_string(it -> first));
+            cmd.append(" ");
+            cmd.append(it -> second);
+            cmd.append(" ");
+            it++;
+          }
+
+          int sockid = socket(AF_INET, SOCK_STREAM, 0);
+          connectToPeer(sockid, peers[i].ip, peers[i].port);
+          sendMessage(sockid, cmd);
+
+          // handle numcontent from other peer
+          handle_message(sockfd, peers, content, last_content_id);
+
+          recieveMessage(sockid);
+          close(sockid);
+        }
+
+        // notify other peers that this one is dead
+        string cmd = "deletepeer ";
+        cmd.append(death.ip);
+        cmd.append(" ");
+        cmd.append(int_to_string(death.port));
+        // start at 1 so we don't send message to ourself
+        for (int i = 1; i < peers.size(); i++) {
+          int sockid = socket(AF_INET, SOCK_STREAM, 0);
+          connectToPeer(sockid, peers[i].ip, peers[i].port);
+          sendMessage(sockid, cmd);
+          recieveMessage(sockid);
+          close(sockid);
+        }
+      }
       // Let user know we finished
       sendMessage(newsockfd, "done");
 
@@ -169,6 +212,45 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
 
     sendMessage(newsockfd, "done");
     printf("%s\n", list_of_peers(peers).c_str());
+  }
+
+  // Another peer wants to give us some content
+  // the key does not change and the lastcontentid does not change
+  // format 'givecontent [numcontent] [content 1 key] [content 1 value] [content 2 key] [content 2 value] ...'
+  if (command == "givecontent") {
+    printf("%s\n", iss.str().c_str());    
+    unsigned int numcontent;
+    iss >> numcontent;
+    unsigned int key;
+    string value;
+    // read all the pieces of content given to this peer
+    for (int i = 0 ; i < numcontent ; i++) {
+      iss>>key;
+      iss>>value; 
+      content[key] = value;
+      printf("");
+    }
+    // increment the ammount of content in this peer
+    peers[0].numContent += numcontent;
+
+    string cmd = "numcontent ";
+    cmd.append(peers[0].ip);
+    cmd.append(" ");
+    cmd.append(int_to_string(peers[0].port));
+    cmd.append(" ");
+    cmd.append(int_to_string(peers[0].numContent));
+
+    //broadcast to everyone the fact that I have more content meow
+    for (int i = 1; i < peers.size(); i++) {
+      int sockid = socket(AF_INET, SOCK_STREAM, 0);
+      connectToPeer(sockid, peers[i].ip, peers[i].port);
+      sendMessage(sockid, cmd);
+      recieveMessage(sockid);
+      close(sockid);
+    }
+
+    // return the number of content and the kvp with key and values delimited by spaces
+    sendMessage(newsockfd, "done");
   }
 
   //Adding content to the network
@@ -382,7 +464,8 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
       content.erase(toEraseInt);
       it++;
     }
-      // decrement the number of content in this peer
+    
+    // decrement the number of content in this peer
     peers[0].numContent -= numContentRequested;
 
     cout<<"supply content string: "<<contentTosend<<endl;
