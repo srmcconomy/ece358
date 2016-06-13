@@ -138,11 +138,11 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
           totalContent += peers[i].numContent;
         }
         // remainder number of content after content is evenly ditributed amongst peers
-        int remainder = totalContent % (peers.size()-1); 
+        int remainder = totalContent % (peers.size()-1);
         // ammount of content per other peer to be redistributed
         int contentPerPeer = (totalContent - remainder)/(peers.size()-1);
 
-        std::map<unsigned int,string>::iterator it = content.begin(); 
+        std::map<unsigned int,string>::iterator it = content.begin();
         // send out content
         for(int i = 1 ; i < peers.size() ; i++) {
           string cmd = "givecontent ";
@@ -218,7 +218,7 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
   // the key does not change and the lastcontentid does not change
   // format 'givecontent [numcontent] [content 1 key] [content 1 value] [content 2 key] [content 2 value] ...'
   if (command == "givecontent") {
-    printf("%s\n", iss.str().c_str());    
+    printf("%s\n", iss.str().c_str());
     unsigned int numcontent;
     iss >> numcontent;
     unsigned int key;
@@ -226,7 +226,7 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
     // read all the pieces of content given to this peer
     for (int i = 0 ; i < numcontent ; i++) {
       iss>>key;
-      iss>>value; 
+      iss>>value;
       content[key] = value;
     }
     // increment the ammount of content in this peer
@@ -461,7 +461,7 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
       content.erase(toEraseInt);
       it++;
     }
-    
+
     // decrement the number of content in this peer
     peers[0].numContent -= numContentRequested;
 

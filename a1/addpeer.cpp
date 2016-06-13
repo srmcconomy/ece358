@@ -91,7 +91,7 @@ int main(int argc, char* argv[]) {
   }
   int contentNeeded = floor(totalContent / (double)peers.size());
   // array that contains the number of content that this peer will request from other peers
-  int askArray[peers.size()] = {0}; 
+  int askArray[peers.size()] = {0};
   while(contentNeeded > 0) {
     // take one content from the peer with the most content
     int biggestContentPeer = 0;
@@ -125,7 +125,7 @@ int main(int argc, char* argv[]) {
       // add content into this peer
       for(int x = 0 ; x < askArray[i] ; x++) {
         newss >> newid >> newcontent;
-        printf("content received %d -> %s\n", newid, newcontent);
+        printf("content received %d -> %s\n", newid, newcontent.c_str());
         content[newid] = newcontent;
       }
       // increment the ammount of content in this peer

@@ -34,13 +34,14 @@ void sendMessage(int sockfd, string msg) {
   while (msg.length() > 255) {
     strncpy(buf, msg.c_str(), sizeof(buf));
 
-      printf(buf);
+    printf("%s\n", buf);
+
     send(sockfd, buf, strlen(buf), 0);
     msg = msg.substr(256);
   }
   strncpy(buf, msg.c_str(), sizeof(buf));
+  printf("%s\n", buf);
 
-    printf(buf);
   buf[255] = 0;
   send(sockfd, buf, strlen(buf), 0);
 }
@@ -51,7 +52,7 @@ string recieveMessage(int sockfd) {
     do {
       recv(sockfd, buf, 256, 0);
 
-        printf(buf);
+        printf("%s\n", buf);
       s.append(buf);
     } while(buf[255] != 0);
     return s;
