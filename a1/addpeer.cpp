@@ -18,6 +18,10 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
+  if (argc != 3 && argc != 1) {
+    printf("Usage: %s [ ip port ]\n", argv[0]);
+    return -1;
+  }
   struct in_addr srvip;
   if (pickServerIPAddr(&srvip) < 0) {
     fprintf(stderr, "pickServerIPAddr() returned error.\n");

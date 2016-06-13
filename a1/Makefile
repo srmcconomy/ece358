@@ -1,19 +1,24 @@
-all: addpeer removepeer removecontent addcontent lookupcontent
+COMMONREQ = core.cpp mybind.c
 
-addpeer: 
-	g++ addpeer.cpp -o addpeer
+all: addpeer removepeer addcontent removecontent lookupcontent allkeys
 
-removepeer:
-	g++ removepeer.cpp -o removepeer
+addpeer: addpeer.cpp process.cpp peer.cpp pickip.c $(COMMONREQ)
+	g++ $@.cpp -o $@
 
-addcontent: 
-	g++ addcontent.cpp -o addcontent
+removepeer: removepeer.cpp $(COMMONREQ)
+	g++ $@.cpp -o $@
 
-removecontent:
-	g++ removecontent.cpp -o removecontent
+addcontent: addcontent.cpp $(COMMONREQ)
+	g++ $@.cpp -o $@
 
-lookupcontent:
-	g++ lookupcontent.cpp -o lookupcontent
+removecontent: removecontent.cpp $(COMMONREQ)
+	g++ $@.cpp -o $@
+
+lookupcontent: lookupcontent.cpp $(COMMONREQ)
+	g++ $@.cpp -o $@
+
+allkeys: allkeys.cpp $(COMMONREQ)
+	g++ $@.cpp -o $@
 
 clean:
-	rm addpeer removepeer removecontent addcontent lookupcontent
+	rm addpeer removepeer addcontent removecontent lookupcontent allkeys
