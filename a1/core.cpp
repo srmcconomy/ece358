@@ -31,7 +31,7 @@ int connectToPeer(int sockfd, string ip, int port) {
 
 void sendMessage(int sockfd, string msg) {
   char buf[256] = "";
-  while (msg.length > 255) {
+  while (msg.length() > 255) {
     strncpy(buf, msg.c_str(), sizeof(buf));
     send(sockfd, buf, strlen(buf), 0);
     msg = msg.substr(256);
@@ -47,6 +47,6 @@ string recieveMessage(int sockfd) {
     do {
       recv(sockfd, buf, 256, 0);
       s.append(buf);
-    } while(buff[256] != 0);
+    } while(buf[256] != 0);
     return s;
 }
