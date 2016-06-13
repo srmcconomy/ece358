@@ -91,7 +91,7 @@ int main(int argc, char* argv[]) {
   }
   int contentNeeded = floor(totalContent / (double)peers.size());
   // array that contains the number of content that this peer will request from other peers
-  int askArray[peers.size()] = {0};
+  int* askArray = new int[peers.size()];
   while(contentNeeded > 0) {
     // take one content from the peer with the most content
     int biggestContentPeer = 0;
@@ -104,11 +104,10 @@ int main(int argc, char* argv[]) {
     askArray[biggestContentPeer] += 1;
     --contentNeeded;
   }
-  cout<<"askarray ";
+
   // now that we have our ask array we can ask other peers for content
   for (int i = 1; i < peers.size(); i++) {
     if(askArray[i] > 0) {
-      cout<<i<<" -> "<<askArray[i]<<" ";
       int sockid = socket(AF_INET, SOCK_STREAM, 0);
       connectToPeer(sockid, peers[i].ip, peers[i].port);
       string cmd = "needcontent";
@@ -125,7 +124,6 @@ int main(int argc, char* argv[]) {
       // add content into this peer
       for(int x = 0 ; x < askArray[i] ; x++) {
         newss >> newid >> newcontent;
-        printf("content received %d -> %s\n", newid, newcontent.c_str());
         content[newid] = newcontent;
       }
       // increment the ammount of content in this peer
@@ -134,7 +132,7 @@ int main(int argc, char* argv[]) {
       close(sockid);
     }
   }
-  cout<<endl;
+  delete askArray;
   //tell everyone I have a different amount of content now
   string cmd = "numcontent ";
   cmd.append(peers[0].ip);
@@ -143,14 +141,12 @@ int main(int argc, char* argv[]) {
   cmd.append(" ");
   cmd.append(int_to_string(peers[0].numContent));
   for (int i = 1; i < peers.size(); i++) {
-    cout<<"notifying peer "<<i<<" of new numcontent"<<endl;
     int sockid = socket(AF_INET, SOCK_STREAM, 0);
     connectToPeer(sockid, peers[i].ip, peers[i].port);
     sendMessage(sockid, cmd);
     recieveMessage(sockid);
     close(sockid);
   }
-  cout<<"finished notifying"<<endl;
   // finished load balancing on add peer
   cout << inet_ntoa(addr.sin_addr) << " " << ntohs(addr.sin_port) << endl;
 
