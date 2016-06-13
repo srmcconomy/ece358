@@ -228,7 +228,6 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
       iss>>key;
       iss>>value; 
       content[key] = value;
-      printf("");
     }
     // increment the ammount of content in this peer
     peers[0].numContent += numcontent;
@@ -448,8 +447,6 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
     unsigned int numContentRequested;
     iss >> numContentRequested;
 
-    cout<<"supplying content qty = "<<numContentRequested<<endl;
-    cout<<"numcontent in peer = "<<peers[0].numContent<<endl;
     string contentTosend = "";
     std::map<unsigned int,string>::iterator it = content.begin();
     // while we still need to append content to send or we've reached the end of our content in this node
@@ -468,9 +465,6 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
     // decrement the number of content in this peer
     peers[0].numContent -= numContentRequested;
 
-    cout<<"supply content string: "<<contentTosend<<endl;
-    cout<<"numcontent in peer = "<<peers[0].numContent<<endl;
-
     string cmd = "numcontent ";
     cmd.append(peers[0].ip);
     cmd.append(" ");
@@ -487,7 +481,6 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
       close(sockid);
     }
 
-    cout<<"sending back content"<<endl;
     // return the number of content and the kvp with key and values delimited by spaces
     sendMessage(newsockfd, contentTosend);
   }
@@ -518,7 +511,6 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
     sendMessage(newsockfd, msg);
   }
 
-  cout<<"closing newsockfd"<<endl;
   close(newsockfd);
   if (command == "needcontent") return RETURN_NEEDCONTENT;
   return RETURN_NORMAL;
