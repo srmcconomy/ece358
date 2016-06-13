@@ -38,7 +38,7 @@ void sendMessage(int sockfd, string msg) {
     printf("%s\n", buf);
 
     send(sockfd, buf, sizeof(buf), 0);
-    if (msg.lenth() > 255) msg = msg.substr(256);
+    if (msg.length() > 255) msg = msg.substr(256);
   } while(msg.length() > 255);
 }
 
