@@ -111,10 +111,10 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
     }
 
     // Give list of networks to new peer
-    sendMessage(newsockfd, list_of_peers(peers));
+    sendMessage(newsockfd, list_of_peers(peers, last_content_id));
     // add peer to this peer's list of peers
     peers.push_back(nakama);
-    printf("%s\n", list_of_peers(peers).c_str());
+    printf("%s\n", list_of_peers(peers, last_content_id).c_str());
   }
 
   // Adding to peer list
@@ -123,7 +123,7 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
     peers.push_back(mate);
 
     sendMessage(newsockfd, "done");
-    printf("%s\n", list_of_peers(peers).c_str());
+    printf("%s\n", list_of_peers(peers, last_content_id).c_str());
   }
 
   // Removing peer from network
@@ -134,26 +134,14 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
     if(death == peers[0]) {
       // offload contents to other peers
       if(peers.size() > 1) {
-        int totalContent = 0;
-
-        for (int i = 0 ; i < peers.size() ; i++) {
-          totalContent += peers[i].numContent;
-        }
-        // remainder number of content after content is evenly ditributed amongst peers
-        int remainder = totalContent % (peers.size()-1);
-        // ammount of content per other peer to be redistributed
-        int contentPerPeer = (totalContent - remainder)/(peers.size()-1);
-
-        cout<<"<<<<"<<"totalContent = "<<totalContent<<endl;
-        cout<<"<<<<"<<"remainder = "<<remainder<<endl;
-        cout<<"<<<<"<<"contentPerPeer = "<<contentPerPeer<<endl;
 
         std::map<unsigned int,string>::iterator it = content.begin();
         unsigned int contentToGive = peers[0].numContent;
         while(contentToGive > 0) {
           // find the poorest node
           unsigned int poorestNode = 1;
-          for (int i = 0 ; i < peers.size() ; i++) {
+          // start at i = 1 so we don't include ourselves
+          for (int i = 1 ; i < peers.size() ; i++) {
             if (peers[poorestNode].numContent > peers[i].numContent) {
               poorestNode = i;
             }
@@ -218,7 +206,7 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
     }
 
     sendMessage(newsockfd, "done");
-    printf("%s\n", list_of_peers(peers).c_str());
+    printf("%s\n", list_of_peers(peers, last_content_id).c_str());
   }
 
   // Another peer wants to give us some content

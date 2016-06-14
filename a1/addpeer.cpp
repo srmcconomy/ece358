@@ -51,7 +51,6 @@ int main(int argc, char* argv[]) {
     // child process
     vector<peer> peers;
     map<unsigned int, string> content;
-    unsigned int last_content_id = 1;
 
     peer self = {
       inet_ntoa(addr.sin_addr),
@@ -60,6 +59,8 @@ int main(int argc, char* argv[]) {
     };
     // add self to list of peers
     peers.push_back(self);
+    // Keep track of the id given to the last piece of content
+    unsigned int last_content_id = 1;
 
     if (argc == 3) {
       // if a ip and port of an existing network was specified then sync with that network
@@ -82,7 +83,8 @@ int main(int argc, char* argv[]) {
         peers.push_back(dao);
       }
 
-      printf("%s\n", list_of_peers(peers).c_str());
+      iss >> last_content_id;
+      printf("%s\n", list_of_peers(peers, last_content_id).c_str());
 
       shutdown(socktd, SHUT_RDWR);
 
@@ -99,7 +101,7 @@ int main(int argc, char* argv[]) {
     int contentNeeded = floor(totalContent / (double)peers.size());
     while(contentNeeded > 0) {
       // take one content from the peer with the most content
-      int biggestContentPeer = 0;
+      int biggestContentPeer = 1;
       for (int i = 1 ; i < peers.size() ; i++) {
           if (peers[biggestContentPeer].numContent <= peers[i].numContent) {
             biggestContentPeer = i;

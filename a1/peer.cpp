@@ -32,7 +32,7 @@ peer get_peer(istringstream& iss) {
   return truth;
 }
 
-string list_of_peers(vector<peer> peers) {
+string list_of_peers(vector<peer> peers, int last_content_id) {
   string all_peers = int_to_string(peers.size());
   all_peers.append(" ");
   for(int i = 0; i < peers.size(); i++){
@@ -43,5 +43,6 @@ string list_of_peers(vector<peer> peers) {
     all_peers.append(int_to_string(peers[i].numContent));
     all_peers.append(" ");
   }
+  all_peers.append(int_to_string(last_content_id));
   return all_peers;
 }
