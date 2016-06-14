@@ -80,14 +80,11 @@ void remove_content(unsigned int id,vector<peer>& peers, map<unsigned int, strin
 int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, string>& content, unsigned int& last_content_id) {
   struct sockaddr_in in_addr;
   socklen_t len = sizeof(struct sockaddr_in);
-  printf("Starting to accept\n");
 
   int newsockfd;
   if ((newsockfd = accept(sockfd, (struct sockaddr *)&in_addr, &len)) < 0){
     return RETURN_NORMAL;
   }
-  printf("Connection accepted from %s %d\n",
-      inet_ntoa(in_addr.sin_addr), ntohs(in_addr.sin_port));
 
   istringstream iss(recieveMessage(newsockfd));
   string command;
@@ -114,7 +111,6 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
     sendMessage(newsockfd, list_of_peers(peers, last_content_id));
     // add peer to this peer's list of peers
     peers.push_back(nakama);
-    printf("%s\n", list_of_peers(peers, last_content_id).c_str());
   }
 
   // Adding to peer list
@@ -123,7 +119,6 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
     peers.push_back(mate);
 
     sendMessage(newsockfd, "done");
-    printf("%s\n", list_of_peers(peers, last_content_id).c_str());
   }
 
   // Removing peer from network
@@ -206,14 +201,12 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
     }
 
     sendMessage(newsockfd, "done");
-    printf("%s\n", list_of_peers(peers, last_content_id).c_str());
   }
 
   // Another peer wants to give us some content
   // the key does not change and the lastcontentid does not change
   // format 'givecontent [numcontent] [content 1 key] [content 1 value] [content 2 key] [content 2 value] ...'
   if (command == "givecontent") {
-    printf("%s\n", iss.str().c_str());
     unsigned int key;
     string value;
     // read the piece of content given to this peer
@@ -248,11 +241,9 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
   //format `addcontent [...content]`
   if (command == "addcontent") {
     string newid;
-    printf("%s\n", iss.str().c_str());
     string newcontent;
     getline(iss, newcontent);
     newcontent = newcontent.substr(1);
-    printf("content to add: %s\n", newcontent.c_str());
     bool you_got_dis = false;
 
     //check if any peers have less content
@@ -273,33 +264,25 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
     }
     //if no peer took it then put it on this peer's list
     if (!you_got_dis) {
-      printf("I got dis\n");
       newid = add_new_content(newcontent, peers, content, last_content_id);
     }
-    for (map<unsigned int, string>::iterator pair = content.begin(); pair != content.end(); pair++) {
-      printf("%d => %s\n", pair->first, pair->second.c_str());
-    }
+
     sendMessage(newsockfd, newid);
   }
 
   //Add content to this peer's list
   //format `newcontent [...content]`
   if (command == "newcontent") {
-    printf("%s\n", iss.str().c_str());
     string newcontent;
     getline(iss, newcontent);
     newcontent = newcontent.substr(1);
     string newid = add_new_content(newcontent, peers, content, last_content_id);
-    for (map<unsigned int, string>::iterator pair = content.begin(); pair != content.end(); pair++) {
-      printf("%d => %s\n", pair->first, pair->second.c_str());
-    }
     sendMessage(newsockfd, newid);
   }
 
   //notification that a peer now has a different number of content AND that the last_content_id has changed
   //format `pluscontent [last_content_id] [ip] [port] [numcontent]`
   if (command == "pluscontent") {
-    printf("%s\n", iss.str().c_str());
     iss >> last_content_id;
     peer p = get_peer(iss);
     for (int i = 1; i < peers.size(); i++) {
@@ -313,7 +296,6 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
   //remove content from the network
   //format `removecontent [key]`
   if (command == "removecontent") {
-    printf("%s\n", iss.str().c_str());
     unsigned int id;
     iss >> id;
     //if this peer does not have the content
@@ -359,7 +341,6 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
   //remove content from this peer's list
   //format `deletecontent [key]`
   if (command == "deletecontent") {
-    printf("%s\n", iss.str().c_str());
     unsigned int id;
     iss >> id;
 
@@ -379,7 +360,6 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
   //lookup content on the network
   //format `lookupcontent [key]`
   if (command == "lookupcontent") {
-    printf("%s\n", iss.str().c_str());
     unsigned int id;
     iss >> id;
     string ret;
@@ -419,7 +399,6 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
   //check if this peer has a specific piece of content
   //format `getcontent [key]`
   if (command == "getcontent") {
-    printf("%s\n", iss.str().c_str());
     unsigned int id;
     iss >> id;
     if (content.count(id)) {
@@ -434,7 +413,6 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
   //another peer is asking for some content because it is less fortunate, luckily I have some extra
   //format `needcontent`
   if (command == "needcontent") {
-    printf("%s\n", iss.str().c_str());
     std::map<unsigned int,string>::iterator it = content.begin();
     // load up content to send
     string contentTosend = int_to_string(it-> first);
@@ -469,7 +447,6 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
   //a notification that a peer has changed its number of content
   //format `numcontent [ip] [port] [numcontent]`
   if (command == "numcontent") {
-    printf("%s\n", iss.str().c_str());
     peer p = get_peer(iss);
     for (int i = 1; i < peers.size(); i++) {
       if (peers[i] == p) {
@@ -488,7 +465,6 @@ int handle_message(const int sockfd, vector<peer>& peers, map<unsigned int, stri
       msg.append(",");
     }
     msg.append("0");
-    printf("%s\n", msg.c_str());
     sendMessage(newsockfd, msg);
   }
 

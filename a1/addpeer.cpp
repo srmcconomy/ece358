@@ -84,7 +84,6 @@ int main(int argc, char* argv[]) {
       }
 
       iss >> last_content_id;
-      printf("%s\n", list_of_peers(peers, last_content_id).c_str());
 
       shutdown(socktd, SHUT_RDWR);
 
@@ -149,10 +148,10 @@ int main(int argc, char* argv[]) {
 
     // we are done syncing with the network. 
     // notify the parent to terminate
-    cout<<"finished syncing with network"<<endl;
     close(pipefd[0]); // close the read-end of the pipe, child does not use it
     write(pipefd[1], "x", 1); // send some char to the parent
     close(pipefd[1]); // close the write-end of the pipe, thus sending EOF to the reader
+
     // Infinite listen loop
     for (;;) {
       int retCode = handle_message(sockfd, peers, content, last_content_id);
@@ -165,7 +164,6 @@ int main(int argc, char* argv[]) {
     while (read(pipefd[0], &buf, 1) > 0) {
       if(buf == 'x') break;
     }
-    cout<<"parent notified"<<endl;
     close(pipefd[0]); // close the read-end of the pipe
   } else {
     // fork failed
